@@ -1,26 +1,266 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap");
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@plugin "@tailwindcss/typography";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  /* Typography */
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-heading: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono);
+
+  /* PCLU Brand Colors — Navy + Sky Blue */
+  --color-pclu-navy-50: oklch(0.97 0.02 250);
+  --color-pclu-navy-100: oklch(0.93 0.04 255);
+  --color-pclu-navy-200: oklch(0.85 0.07 255);
+  --color-pclu-navy-300: oklch(0.72 0.12 255);
+  --color-pclu-navy-400: oklch(0.58 0.17 255);
+  --color-pclu-navy-500: oklch(0.45 0.20 258);
+  --color-pclu-navy-600: oklch(0.35 0.18 260);
+  --color-pclu-navy-700: oklch(0.27 0.15 262);
+  --color-pclu-navy-800: oklch(0.20 0.11 264);
+  --color-pclu-navy-900: oklch(0.15 0.07 265);
+  --color-pclu-navy-950: oklch(0.10 0.04 267);
+
+  --color-pclu-sky-50: oklch(0.97 0.02 240);
+  --color-pclu-sky-100: oklch(0.94 0.05 240);
+  --color-pclu-sky-200: oklch(0.88 0.10 240);
+  --color-pclu-sky-300: oklch(0.80 0.14 240);
+  --color-pclu-sky-400: oklch(0.72 0.16 240);
+  --color-pclu-sky-500: oklch(0.65 0.18 240);
+  --color-pclu-sky-600: oklch(0.58 0.16 240);
+  --color-pclu-sky-700: oklch(0.50 0.13 240);
+  --color-pclu-sky-800: oklch(0.42 0.10 240);
+  --color-pclu-sky-900: oklch(0.35 0.08 240);
+  --color-pclu-sky-950: oklch(0.28 0.06 240);
+
+  /* shadcn CSS variable bridge */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Border radius scale */
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* ============================================================
+   PCLU AICTS Light Mode — Precision Blue (White/Navy/Light Blue)
+   Primary: PCLU Navy 
+   Accent:  PCLU Sky (Light Blue)
+   ============================================================ */
+:root {
+  --background: oklch(0.99 0.002 250);
+  --foreground: oklch(0.15 0.02 250);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.15 0.02 250);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.15 0.02 250);
+
+  /* PCLU Navy as primary */
+  --primary: oklch(0.27 0.15 262);
+  --primary-foreground: oklch(0.98 0 0);
+
+  --secondary: oklch(0.96 0.02 245);
+  --secondary-foreground: oklch(0.27 0.15 262);
+  --muted: oklch(0.96 0.01 250);
+  --muted-foreground: oklch(0.52 0.04 250);
+  /* Light blue accent */
+  --accent: oklch(0.65 0.18 240);
+  --accent-foreground: oklch(0.98 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.91 0.01 250);
+  --input: oklch(0.91 0.01 250);
+  --ring: oklch(0.65 0.18 240);
+
+  /* Chart palette — crisp blues and complementary tones */
+  --chart-1: oklch(0.65 0.18 240);   /* Sky Blue */
+  --chart-2: oklch(0.27 0.15 262);   /* Navy */
+  --chart-3: oklch(0.85 0.10 240);   /* Very Light Blue */
+  --chart-4: oklch(0.50 0.12 245);   /* Medium Blue */
+  --chart-5: oklch(0.40 0.15 260);   /* Deep Indigo */
+
+  --radius: 0.625rem;
+
+  --sidebar: oklch(0.27 0.15 262);
+  --sidebar-foreground: oklch(0.95 0.01 250);
+  --sidebar-primary: oklch(0.65 0.18 240);
+  --sidebar-primary-foreground: oklch(0.98 0 0);
+  --sidebar-accent: oklch(0.35 0.18 260);
+  --sidebar-accent-foreground: oklch(0.95 0.01 250);
+  --sidebar-border: oklch(0.35 0.15 260);
+  --sidebar-ring: oklch(0.65 0.18 240);
+}
+
+/* ============================================================
+   Dark Mode — Deep navy background with vibrant light blue accents
+   ============================================================ */
+.dark {
+  --background: oklch(0.12 0.04 265);
+  --foreground: oklch(0.95 0.01 250);
+  --card: oklch(0.17 0.05 263);
+  --card-foreground: oklch(0.95 0.01 250);
+  --popover: oklch(0.17 0.05 263);
+  --popover-foreground: oklch(0.95 0.01 250);
+  --primary: oklch(0.72 0.16 240);
+  --primary-foreground: oklch(0.10 0.03 240);
+  --secondary: oklch(0.22 0.07 263);
+  --secondary-foreground: oklch(0.95 0.01 250);
+  --muted: oklch(0.22 0.07 263);
+  --muted-foreground: oklch(0.62 0.04 250);
+  --accent: oklch(0.72 0.16 240);
+  --accent-foreground: oklch(0.10 0.03 240);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 12%);
+  --ring: oklch(0.72 0.16 240);
+  --chart-1: oklch(0.72 0.16 240);
+  --chart-2: oklch(0.58 0.17 255);
+  --chart-3: oklch(0.85 0.10 240);
+  --chart-4: oklch(0.68 0.18 300);
+  --chart-5: oklch(0.62 0.20 195);
+  --sidebar: oklch(0.10 0.04 267);
+  --sidebar-foreground: oklch(0.92 0.01 250);
+  --sidebar-primary: oklch(0.72 0.16 240);
+  --sidebar-primary-foreground: oklch(0.10 0.03 240);
+  --sidebar-accent: oklch(0.17 0.05 263);
+  --sidebar-accent-foreground: oklch(0.92 0.01 250);
+  --sidebar-border: oklch(1 0 0 / 8%);
+  --sidebar-ring: oklch(0.72 0.16 240);
+}
+
+/* ============================================================
+   Base styles
+   ============================================================ */
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  html {
+    @apply font-sans scroll-smooth;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    @apply font-semibold tracking-tight;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-border rounded-full;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-muted-foreground/50;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ============================================================
+   Utility classes
+   ============================================================ */
+@layer utilities {
+  /* Glass morphism card */
+  .glass {
+    @apply bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl;
+  }
+
+  /* Gradient text */
+  .gradient-text {
+    @apply bg-gradient-to-r from-pclu-navy-700 to-pclu-sky-500 dark:from-pclu-sky-400 dark:to-pclu-navy-300 bg-clip-text text-transparent;
+  }
+
+  /* PCLU brand gradient background */
+  .brand-gradient {
+    @apply bg-gradient-to-br from-pclu-navy-900 via-pclu-navy-800 to-pclu-sky-800;
+  }
+
+  /* Subtle hover lift */
+  .hover-lift {
+    @apply transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-xl hover:bg-white/10;
+  }
+
+  /* Page container */
+  .page-container {
+    @apply mx-auto max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
+
+  /* Status badge colors - adjusted for cleaner look */
+  .badge-employed { @apply bg-pclu-sky-100 text-pclu-sky-800 dark:bg-pclu-sky-900/30 dark:text-pclu-sky-400; }
+  .badge-unemployed { @apply bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400; }
+  .badge-ofw { @apply bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400; }
+  .badge-self-employed { @apply bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400; }
+  .badge-further-study { @apply bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400; }
+  .badge-retired { @apply bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400; }
+
+  /* Tiptap editor styles */
+  .tiptap-editor {
+    @apply min-h-[200px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2;
+  }
+  .tiptap-editor .ProseMirror {
+    @apply outline-none min-h-[160px] max-w-none text-sm leading-relaxed;
+  }
+  .tiptap-editor .ProseMirror p.is-editor-empty:first-child::before {
+    @apply text-muted-foreground;
+    content: attr(data-placeholder);
+    float: left;
+    height: 0;
+    pointer-events: none;
+  }
+  .tiptap-editor .ProseMirror ul { @apply list-disc pl-6 my-2; }
+  .tiptap-editor .ProseMirror ol { @apply list-decimal pl-6 my-2; }
+  .tiptap-editor .ProseMirror h1 { @apply text-2xl font-bold my-3; }
+  .tiptap-editor .ProseMirror h2 { @apply text-xl font-semibold my-2; }
+  .tiptap-editor .ProseMirror h3 { @apply text-lg font-medium my-2; }
+  .tiptap-editor .ProseMirror blockquote { @apply border-l-4 border-primary pl-4 italic my-3; }
+  .tiptap-editor .ProseMirror code { @apply bg-muted rounded px-1.5 py-0.5 font-mono text-xs; }
+  .tiptap-editor .ProseMirror pre { @apply bg-muted rounded p-4 font-mono text-xs overflow-x-auto my-3; }
+  .tiptap-editor .ProseMirror a { @apply text-primary underline underline-offset-2; }
 }

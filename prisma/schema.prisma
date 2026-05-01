@@ -1,0 +1,241 @@
+// This is your Prisma schema file — mirrors the Supabase PostgreSQL schema
+// Run: npx prisma db pull  (to sync from existing Supabase DB)
+// Run: npx prisma generate (to regenerate the Prisma client)
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ============================================================
+// PROFILES — extends Supabase auth.users
+// ============================================================
+model Profile {
+  id              String   @id @db.Uuid
+  role            String   // 'alumni' | 'admin' | 'employer'
+  full_name       String
+  email           String   @unique
+  phone           String?
+  profile_photo_url String?
+  is_verified     Boolean  @default(false)
+  is_active       Boolean  @default(true)
+  created_at      DateTime @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime @updatedAt @db.Timestamptz(6)
+
+  // Relations
+  alumni          Alumni?
+  employer        Employer?
+  notifications   Notification[]
+  audit_logs      AuditLog[]
+  announcements   Announcement[]
+  approved_employers Employer[] @relation("ApprovedByAdmin")
+
+  @@map("profiles")
+}
+
+// ============================================================
+// ALUMNI — extends profiles
+// ============================================================
+model Alumni {
+  id               String   @id @db.Uuid
+  student_id       String?  @unique
+  course           String
+  major            String?
+  batch_year       Int
+  graduation_year  Int
+  address          String?
+  city             String?
+  province         String?
+  linkedin_url     String?
+  is_profile_public Boolean @default(true)
+  created_at       DateTime @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime @updatedAt @db.Timestamptz(6)
+
+  // Relations
+  profile          Profile  @relation(fields: [id], references: [id], onDelete: Cascade)
+  career_records   CareerRecord[]
+  job_applications JobApplication[]
+
+  @@map("alumni")
+}
+
+// ============================================================
+// EMPLOYERS — extends profiles
+// ============================================================
+model Employer {
+  id                    String    @id @db.Uuid
+  company_name          String
+  industry              String
+  company_size          String?   // '1-10' | '11-50' | '51-200' | '201-500' | '500+'
+  business_permit_number String?
+  company_address       String?
+  company_website       String?
+  company_logo_url      String?
+  approval_status       String    @default("pending") // 'pending' | 'approved' | 'rejected'
+  rejection_reason      String?
+  approved_at           DateTime? @db.Timestamptz(6)
+  approved_by           String?   @db.Uuid
+  created_at            DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at            DateTime  @updatedAt @db.Timestamptz(6)
+
+  // Relations
+  profile               Profile   @relation(fields: [id], references: [id], onDelete: Cascade)
+  approver              Profile?  @relation("ApprovedByAdmin", fields: [approved_by], references: [id])
+  job_postings          JobPosting[]
+
+  @@map("employers")
+}
+
+// ============================================================
+// CAREER RECORDS
+// ============================================================
+model CareerRecord {
+  id                String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  alumni_id         String    @db.Uuid
+  employment_status String    // 'employed' | 'self_employed' | 'unemployed' | 'ofw' | 'further_study' | 'retired'
+  employer_name     String?
+  job_title         String?
+  industry          String?
+  employment_type   String?   // 'full_time' | 'part_time' | 'contractual' | 'freelance' | 'internship'
+  salary_range      String?   // 'below_15k' | '15k_25k' | '25k_35k' | '35k_50k' | '50k_75k' | 'above_75k'
+  start_date        DateTime? @db.Date
+  end_date          DateTime? @db.Date
+  is_current        Boolean   @default(true)
+  country           String    @default("Philippines")
+  city              String?
+  job_description   String?
+  created_at        DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime  @updatedAt @db.Timestamptz(6)
+
+  // Relations
+  alumni            Alumni    @relation(fields: [alumni_id], references: [id], onDelete: Cascade)
+
+  @@index([alumni_id])
+  @@index([is_current])
+  @@map("career_records")
+}
+
+// ============================================================
+// JOB POSTINGS
+// ============================================================
+model JobPosting {
+  id                String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  employer_id       String    @db.Uuid
+  title             String
+  description       String
+  requirements      String?
+  job_type          String    // 'full_time' | 'part_time' | 'contractual' | 'internship' | 'freelance'
+  industry          String
+  location          String?
+  is_remote         Boolean   @default(false)
+  salary_min        Decimal?  @db.Decimal
+  salary_max        Decimal?  @db.Decimal
+  preferred_courses String[]
+  slots             Int       @default(1)
+  expires_at        DateTime  @db.Timestamptz(6)
+  status            String    @default("pending") // 'pending' | 'active' | 'expired' | 'closed' | 'rejected'
+  rejection_reason  String?
+  created_at        DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime  @updatedAt @db.Timestamptz(6)
+
+  // Relations
+  employer          Employer  @relation(fields: [employer_id], references: [id], onDelete: Cascade)
+  applications      JobApplication[]
+
+  @@index([status])
+  @@index([expires_at])
+  @@map("job_postings")
+}
+
+// ============================================================
+// JOB APPLICATIONS
+// ============================================================
+model JobApplication {
+  id                 String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  job_id             String    @db.Uuid
+  alumni_id          String    @db.Uuid
+  cover_letter       String?
+  resume_url         String?
+  application_status String    @default("pending") // 'pending' | 'viewed' | 'shortlisted' | 'for_interview' | 'hired' | 'rejected'
+  employer_notes     String?
+  applied_at         DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime  @updatedAt @db.Timestamptz(6)
+
+  // Relations
+  job                JobPosting @relation(fields: [job_id], references: [id], onDelete: Cascade)
+  alumni             Alumni     @relation(fields: [alumni_id], references: [id], onDelete: Cascade)
+
+  @@unique([job_id, alumni_id])
+  @@index([alumni_id])
+  @@index([job_id])
+  @@map("job_applications")
+}
+
+// ============================================================
+// ANNOUNCEMENTS
+// ============================================================
+model Announcement {
+  id           String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  admin_id     String    @db.Uuid
+  title        String
+  content      String    // HTML string from Tiptap
+  category     String    @default("general") // 'general' | 'event' | 'job_fair' | 'seminar' | 'alumni_news'
+  image_url    String?
+  is_published Boolean   @default(false)
+  published_at DateTime? @db.Timestamptz(6)
+  expires_at   DateTime? @db.Timestamptz(6)
+  created_at   DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at   DateTime  @updatedAt @db.Timestamptz(6)
+
+  // Relations
+  admin        Profile   @relation(fields: [admin_id], references: [id])
+
+  @@map("announcements")
+}
+
+// ============================================================
+// AUDIT LOGS
+// ============================================================
+model AuditLog {
+  id          String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id     String?   @db.Uuid
+  action      String
+  table_name  String?
+  record_id   String?   @db.Uuid
+  old_values  Json?
+  new_values  Json?
+  ip_address  String?
+  user_agent  String?
+  created_at  DateTime  @default(now()) @db.Timestamptz(6)
+
+  // Relations
+  user        Profile?  @relation(fields: [user_id], references: [id])
+
+  @@index([user_id])
+  @@map("audit_logs")
+}
+
+// ============================================================
+// NOTIFICATIONS
+// ============================================================
+model Notification {
+  id         String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id    String    @db.Uuid
+  title      String
+  message    String
+  type       String?   // 'job_application' | 'job_status' | 'announcement' | 'account' | 'career'
+  is_read    Boolean   @default(false)
+  action_url String?
+  created_at DateTime  @default(now()) @db.Timestamptz(6)
+
+  // Relations
+  user       Profile   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@index([is_read])
+  @@map("notifications")
+}
