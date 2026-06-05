@@ -20,32 +20,32 @@ export function Navbar({ title }: NavbarProps) {
 
   return (
     <>
-      <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b border-border/60 bg-background/95 backdrop-blur-sm px-4 lg:px-6">
+      <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-border/60 bg-background/95 backdrop-blur-sm px-4 lg:px-8">
         {/* Mobile hamburger */}
         <Button
           id="mobile-menu-button"
           variant="ghost"
           size="sm"
-          className="lg:hidden h-8 w-8 p-0 text-muted-foreground"
+          className="lg:hidden h-10 w-10 p-0 text-muted-foreground"
           onClick={() => setSidebarOpen(true)}
         >
-          <Menu size={18} />
+          <Menu size={24} />
         </Button>
 
         {/* Page title */}
         {title && (
           <div className="flex-1">
-            <h1 className="font-heading font-semibold text-base text-foreground">{title}</h1>
+            <h1 className="font-heading font-semibold text-lg text-foreground">{title}</h1>
           </div>
         )}
         {!title && <div className="flex-1" />}
 
         {/* Right actions */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <NotificationBell userId={profile?.id} />
-          <Avatar className="h-8 w-8 ring-2 ring-primary/20 cursor-pointer hover:ring-primary/40 transition-all">
+          <Avatar className="h-10 w-10 ring-2 ring-primary/20 cursor-pointer hover:ring-primary/40 transition-all">
             <AvatarImage src={profile?.profile_photo_url ?? ""} alt={profile?.full_name ?? ""} />
-            <AvatarFallback className="bg-primary text-primary-foreground text-xs font-semibold">
+            <AvatarFallback className="bg-primary text-primary-foreground text-sm font-semibold">
               {formatInitials(profile?.full_name)}
             </AvatarFallback>
           </Avatar>

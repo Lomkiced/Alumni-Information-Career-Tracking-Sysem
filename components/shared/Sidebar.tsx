@@ -22,7 +22,6 @@ const ALUMNI_MENU = [
 
 const EMPLOYER_MENU = [
   { href: "/employer/jobs", icon: Briefcase, label: "My Job Postings" },
-  { href: "/employer/jobs/new", icon: PlusCircle, label: "Post a Job" },
   { href: "/employer/applicants", icon: UserCheck, label: "Applicants" },
   { href: "/employer/profile", icon: Building2, label: "Company Profile" },
 ];
@@ -77,13 +76,13 @@ export function Sidebar({ onClose }: SidebarProps) {
     <div className="flex flex-col h-full bg-sidebar text-sidebar-foreground">
       {/* Logo */}
       <div className="flex items-center justify-between px-4 py-5 border-b border-sidebar-border">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-sidebar-primary flex items-center justify-center shadow-sm">
-            <Award size={16} className="text-sidebar-primary-foreground" />
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-lg bg-sidebar-primary flex items-center justify-center shadow-sm">
+            <Award size={20} className="text-sidebar-primary-foreground" />
           </div>
           <div>
-            <p className="text-sidebar-foreground font-bold text-sm leading-none">AICTS</p>
-            <p className="text-sidebar-primary text-[10px] font-medium mt-0.5">{ROLE_LABELS[role]}</p>
+            <p className="text-sidebar-foreground font-bold text-base leading-none">AICTS</p>
+            <p className="text-sidebar-primary text-xs font-medium mt-1">{ROLE_LABELS[role]}</p>
           </div>
         </div>
         {onClose && (
@@ -103,15 +102,15 @@ export function Sidebar({ onClose }: SidebarProps) {
               href={href}
               onClick={onClose}
               className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 group relative",
+                "flex items-center gap-3 px-4 py-3 rounded-lg text-base font-medium transition-all duration-150 group relative",
                 isActive
                   ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-sm"
                   : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
               )}
             >
-              <Icon size={16} className={cn("shrink-0", isActive ? "text-sidebar-primary-foreground" : "text-sidebar-foreground/50 group-hover:text-sidebar-accent-foreground")} />
+              <Icon size={20} className={cn("shrink-0", isActive ? "text-sidebar-primary-foreground" : "text-sidebar-foreground/50 group-hover:text-sidebar-accent-foreground")} />
               <span className="flex-1">{label}</span>
-              {isActive && <ChevronRight size={14} className="opacity-60" />}
+              {isActive && <ChevronRight size={16} className="opacity-60" />}
             </Link>
           );
         })}
@@ -120,15 +119,15 @@ export function Sidebar({ onClose }: SidebarProps) {
       {/* User section */}
       <div className="px-3 py-4 border-t border-sidebar-border space-y-2">
         <div className="flex items-center gap-3 px-2 py-2 rounded-lg">
-          <Avatar className="h-8 w-8 ring-2 ring-sidebar-primary/40">
+          <Avatar className="h-10 w-10 ring-2 ring-sidebar-primary/40">
             <AvatarImage src={profile?.profile_photo_url ?? ""} alt={profile?.full_name ?? ""} />
-            <AvatarFallback className="bg-sidebar-primary text-sidebar-primary-foreground text-xs font-semibold">
+            <AvatarFallback className="bg-sidebar-primary text-sidebar-primary-foreground text-sm font-semibold">
               {formatInitials(profile?.full_name)}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
-            <p className="text-sidebar-foreground text-sm font-medium truncate">{profile?.full_name ?? "Loading..."}</p>
-            <p className="text-sidebar-foreground/50 text-xs truncate">{profile?.email ?? ""}</p>
+            <p className="text-sidebar-foreground text-base font-medium truncate">{profile?.full_name ?? "Loading..."}</p>
+            <p className="text-sidebar-foreground/50 text-sm truncate">{profile?.email ?? ""}</p>
           </div>
         </div>
         <Button
@@ -137,7 +136,7 @@ export function Sidebar({ onClose }: SidebarProps) {
           size="sm"
           className="w-full justify-start gap-2.5 text-sidebar-foreground/60 hover:text-red-400 hover:bg-red-500/10 px-3"
         >
-          <LogOut size={15} />
+          <LogOut size={18} />
           Sign Out
         </Button>
       </div>

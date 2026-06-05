@@ -147,7 +147,7 @@ export default function NewJobPage() {
                 <FormItem>
                   <FormLabel>Min. Salary (₱)</FormLabel>
                   <FormControl>
-                    <Input {...field} type="number" placeholder="e.g. 20000"
+                    <Input {...field} value={field.value ?? ""} type="number" placeholder="e.g. 20000"
                       onChange={e => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)} />
                   </FormControl>
                   <FormMessage />
@@ -157,7 +157,7 @@ export default function NewJobPage() {
                 <FormItem>
                   <FormLabel>Max. Salary (₱)</FormLabel>
                   <FormControl>
-                    <Input {...field} type="number" placeholder="e.g. 40000"
+                    <Input {...field} value={field.value ?? ""} type="number" placeholder="e.g. 40000"
                       onChange={e => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)} />
                   </FormControl>
                   <FormMessage />

@@ -17,6 +17,7 @@ export const employerProfileSchema = z.object({
     .refine((v) => !v || v === "" || /^https?:\/\/.+/.test(v), {
       message: "Must be a valid URL",
     }),
+  company_description: z.string().optional(),
 });
 
 export type EmployerProfileInput = z.infer<typeof employerProfileSchema>;

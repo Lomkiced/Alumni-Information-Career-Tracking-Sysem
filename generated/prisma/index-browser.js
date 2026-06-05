@@ -158,6 +158,7 @@ exports.Prisma.EmployerScalarFieldEnum = {
   company_address: 'company_address',
   company_website: 'company_website',
   company_logo_url: 'company_logo_url',
+  company_description: 'company_description',
   approval_status: 'approval_status',
   rejection_reason: 'rejection_reason',
   approved_at: 'approved_at',

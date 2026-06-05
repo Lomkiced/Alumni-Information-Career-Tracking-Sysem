@@ -7,7 +7,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <div className="flex h-screen bg-background overflow-hidden">
       {/* Desktop sidebar */}
-      <aside className="hidden lg:flex lg:w-60 xl:w-64 shrink-0 flex-col border-r border-sidebar-border">
+      <aside className="hidden lg:flex lg:w-72 xl:w-80 shrink-0 flex-col border-r border-sidebar-border">
         <Sidebar />
       </aside>
 
@@ -15,7 +15,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <div className="flex flex-col flex-1 overflow-hidden">
         <Navbar />
         <main className="flex-1 overflow-y-auto">
-          <div className="page-container py-6">
+          <div className="page-container py-10">
             {children}
           </div>
         </main>
