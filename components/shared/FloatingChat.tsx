@@ -2,7 +2,7 @@
 // components/shared/FloatingChat.tsx
 import { useState, useEffect, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { X, Send, Loader2, MinusSquare, MessageCircle, Check, CheckCheck } from "lucide-react";
+import { X, Send, Loader2, MinusSquare, MessageCircle, Check, CheckCheck, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -108,6 +108,15 @@ export function FloatingChat() {
           );
         }
       )
+      .on(
+        "postgres_changes",
+        { event: "DELETE", schema: "public", table: "messages", filter: `conversation_id=eq.${conversationId}` },
+        (payload) => {
+          setMessages((prev) => 
+            prev.filter(m => m.id !== payload.old.id)
+          );
+        }
+      )
       .subscribe();
 
     return () => {
@@ -185,6 +194,25 @@ export function FloatingChat() {
     }
   };
 
+  const handleDeleteMessage = async (messageId: string) => {
+    // Optimistic UI update
+    setMessages(prev => prev.filter(m => m.id !== messageId));
+    
+    try {
+      const res = await fetch(`/api/messages?messageId=${messageId}`, {
+        method: "DELETE"
+      });
+      if (!res.ok) {
+        throw new Error("Failed to delete message");
+      }
+    } catch (err) {
+      console.error("Failed to delete message", err);
+      // If we failed, we might want to reload the conversation, but for simplicity we'll just show a toast
+      toast.error("Could not delete the message. It may have already been removed.");
+      loadConversation(targetUserId!);
+    }
+  };
+
   if (!isOpen) return null;
 
   if (isMinimized) {
@@ -251,7 +279,7 @@ export function FloatingChat() {
                   const showAvatar = !isMe && (idx === 0 || messages[idx - 1].sender_id !== msg.sender_id);
                   
                   return (
-                    <div key={msg.id} className={`flex gap-2 ${isMe ? "justify-end" : "justify-start"}`}>
+                    <div key={msg.id} className={`flex gap-2 group ${isMe ? "justify-end" : "justify-start"}`}>
                       {!isMe && showAvatar ? (
                         <Avatar className="h-6 w-6 mt-1 shrink-0">
                           <AvatarImage src={targetProfile?.profile_photo_url || ""} />
@@ -260,6 +288,17 @@ export function FloatingChat() {
                       ) : (
                         <div className="w-6 shrink-0" /> // spacer
                       )}
+                      
+                      {isMe && !msg.id.startsWith('temp-') && (
+                        <button
+                          onClick={() => handleDeleteMessage(msg.id)}
+                          className="opacity-0 group-hover:opacity-100 p-1.5 text-muted-foreground hover:text-destructive transition-all self-center rounded-full hover:bg-muted"
+                          title="Unsend Message"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      )}
+
                       <div className={`max-w-[75%] px-3 py-2 rounded-2xl text-sm ${isMe ? "bg-primary text-primary-foreground rounded-tr-sm" : "bg-muted text-foreground rounded-tl-sm"}`}>
                         <p className="whitespace-pre-wrap break-words">{msg.content}</p>
                         {isMe && (
@@ -284,6 +323,16 @@ export function FloatingChat() {
                           </div>
                         )}
                       </div>
+                      
+                      {!isMe && (
+                        <button
+                          onClick={() => handleDeleteMessage(msg.id)}
+                          className="opacity-0 group-hover:opacity-100 p-1.5 text-muted-foreground hover:text-destructive transition-all self-center rounded-full hover:bg-muted"
+                          title="Delete for me"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      )}
                     </div>
                   );
                 })}

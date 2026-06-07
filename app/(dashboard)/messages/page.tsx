@@ -3,11 +3,12 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { formatDistanceToNow } from "date-fns";
-import { Loader2, MessageCircle } from "lucide-react";
+import { Loader2, MessageCircle, Trash2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { formatInitials } from "@/lib/utils/format";
 
 import { Suspense } from "react";
+import { toast } from "sonner";
 
 function MessagesContent() {
   const router = useRouter();
@@ -40,6 +41,24 @@ function MessagesContent() {
     const newParams = new URLSearchParams(searchParams.toString());
     newParams.set("chat", userId);
     router.replace(`?${newParams.toString()}`, { scroll: false });
+  };
+
+  const handleDeleteConversation = async (e: React.MouseEvent, conversationId: string) => {
+    e.stopPropagation();
+    if (!confirm("Are you sure you want to delete this entire conversation? This cannot be undone.")) return;
+
+    // Optimistic delete
+    setConversations(prev => prev.filter(c => c.id !== conversationId));
+
+    try {
+      const res = await fetch(`/api/messages/conversations?id=${conversationId}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Failed to delete");
+      toast.success("Conversation deleted successfully");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to delete conversation");
+      fetchConversations(); // restore
+    }
   };
 
   return (
@@ -75,7 +94,7 @@ function MessagesContent() {
               <div 
                 key={conv.id}
                 onClick={() => openChat(user.id)}
-                className="flex items-center gap-4 p-4 hover:bg-muted/50 cursor-pointer transition-colors relative"
+                className="group flex items-center gap-4 p-4 hover:bg-muted/50 cursor-pointer transition-colors relative"
               >
                 <Avatar className="w-12 h-12 shrink-0 border border-border">
                   <AvatarImage src={user.profile_photo_url || ""} />
@@ -108,6 +127,14 @@ function MessagesContent() {
                     {conv.unreadCount}
                   </div>
                 )}
+                
+                <button
+                  onClick={(e) => handleDeleteConversation(e, conv.id)}
+                  className="opacity-0 group-hover:opacity-100 p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-full transition-all shrink-0 ml-2"
+                  title="Delete conversation"
+                >
+                  <Trash2 size={18} />
+                </button>
               </div>
             );
           })}
