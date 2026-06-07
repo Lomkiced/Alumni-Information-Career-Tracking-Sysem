@@ -26,6 +26,7 @@ const EMPLOYER_MENU = [
   { href: "/employer/applicants", icon: UserCheck, label: "Applicants" },
   { href: "/messages", icon: MessageCircle, label: "Messages" },
   { href: "/employer/profile", icon: Building2, label: "Company Profile" },
+  { href: "/employer/announcements", icon: Megaphone, label: "Announcements" },
 ];
 
 const ADMIN_MENU = [

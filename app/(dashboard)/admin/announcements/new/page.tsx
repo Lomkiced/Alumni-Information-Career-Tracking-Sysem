@@ -41,7 +41,7 @@ export default function NewAnnouncementPage() {
   const form = useForm<FormInput, any, FormInput>({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolver: zodResolver(schema) as any,
-    defaultValues: { title: "", content: "", category: "general", is_published: false },
+    defaultValues: { title: "", content: "", category: "general", expires_at: "", is_published: false },
   });
 
   const save = async (data: FormInput, publish: boolean) => {

@@ -21,8 +21,8 @@ export function AlumniRegisterForm() {
   const [error, setError] = useState<string | null>(null);
 
   const form = useForm<AlumniRegisterInput>({
-    resolver: zodResolver(alumniRegisterSchema),
-    defaultValues: { full_name: "", email: "", password: "", confirm_password: "", student_id: "", course: undefined, batch_year: undefined, graduation_year: undefined },
+    resolver: zodResolver(alumniRegisterSchema) as any,
+    defaultValues: { full_name: "", email: "", password: "", confirm_password: "", student_id: "", course: undefined, batch_year: "", graduation_year: "" } as any,
   });
 
   const onSubmit = async (data: AlumniRegisterInput) => {
@@ -57,6 +57,7 @@ export function AlumniRegisterForm() {
 
   const inputCls = "bg-white/10 border-white/20 text-white placeholder:text-slate-400 focus:border-pclu-sky-400 h-10";
   const labelCls = "text-slate-200 text-sm font-medium";
+  const control = form.control as any;
 
   return (
     <Form {...form}>
@@ -69,21 +70,21 @@ export function AlumniRegisterForm() {
           <div className="h-px bg-white/10" />
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <FormField control={form.control} name="full_name" render={({ field }) => (
+          <FormField control={control} name="full_name" render={({ field }) => (
             <FormItem className="sm:col-span-2">
               <FormLabel className={labelCls}>Full Name *</FormLabel>
               <FormControl><Input {...field} id="alumni-full-name" placeholder="Juan dela Cruz" className={inputCls} /></FormControl>
               <FormMessage className="text-red-300 text-xs" />
             </FormItem>
           )} />
-          <FormField control={form.control} name="email" render={({ field }) => (
+          <FormField control={control} name="email" render={({ field }) => (
             <FormItem className="sm:col-span-2">
               <FormLabel className={labelCls}>Email Address *</FormLabel>
               <FormControl><Input {...field} id="alumni-email" type="email" placeholder="juan@email.com" className={inputCls} /></FormControl>
               <FormMessage className="text-red-300 text-xs" />
             </FormItem>
           )} />
-          <FormField control={form.control} name="password" render={({ field }) => (
+          <FormField control={control} name="password" render={({ field }) => (
             <FormItem>
               <FormLabel className={labelCls}>Password *</FormLabel>
               <FormControl>
@@ -97,7 +98,7 @@ export function AlumniRegisterForm() {
               <FormMessage className="text-red-300 text-xs" />
             </FormItem>
           )} />
-          <FormField control={form.control} name="confirm_password" render={({ field }) => (
+          <FormField control={control} name="confirm_password" render={({ field }) => (
             <FormItem>
               <FormLabel className={labelCls}>Confirm Password *</FormLabel>
               <FormControl>
@@ -119,17 +120,17 @@ export function AlumniRegisterForm() {
           <div className="h-px bg-white/10" />
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <FormField control={form.control} name="student_id" render={({ field }) => (
+          <FormField control={control} name="student_id" render={({ field }) => (
             <FormItem>
               <FormLabel className={labelCls}>Student ID <span className="text-slate-500">(optional)</span></FormLabel>
               <FormControl><Input {...field} id="alumni-student-id" placeholder="e.g. 2019-12345" className={inputCls} /></FormControl>
               <FormMessage className="text-red-300 text-xs" />
             </FormItem>
           )} />
-          <FormField control={form.control} name="course" render={({ field }) => (
+          <FormField control={control} name="course" render={({ field }) => (
             <FormItem>
               <FormLabel className={labelCls}>Course *</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
+              <Select onValueChange={field.onChange} value={field.value ?? ""}>
                 <FormControl>
                   <SelectTrigger id="alumni-course" className={`${inputCls} w-full`}>
                     <SelectValue placeholder="Select course" />
@@ -142,34 +143,21 @@ export function AlumniRegisterForm() {
               <FormMessage className="text-red-300 text-xs" />
             </FormItem>
           )} />
-          <FormField control={form.control} name="batch_year" render={({ field }) => (
+          <FormField control={control} name="batch_year" render={({ field }) => (
             <FormItem>
               <FormLabel className={labelCls}>Batch Year *</FormLabel>
-              <Select onValueChange={(v) => field.onChange(Number(v))} value={field.value?.toString()}>
-                <FormControl>
-                  <SelectTrigger id="alumni-batch-year" className={`${inputCls} w-full`}>
-                    <SelectValue placeholder="Select year" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>{BATCH_YEARS.map((y) => <SelectItem key={y} value={y.toString()}>{y}</SelectItem>)}</SelectContent>
-              </Select>
+              <FormControl><Input {...field} value={field.value ?? ""} type="number" id="alumni-batch-year" placeholder="e.g. 2020" className={inputCls} /></FormControl>
               <FormMessage className="text-red-300 text-xs" />
             </FormItem>
           )} />
-          <FormField control={form.control} name="graduation_year" render={({ field }) => (
+          <FormField control={control} name="graduation_year" render={({ field }) => (
             <FormItem>
               <FormLabel className={labelCls}>Graduation Year *</FormLabel>
-              <Select onValueChange={(v) => field.onChange(Number(v))} value={field.value?.toString()}>
-                <FormControl>
-                  <SelectTrigger id="alumni-grad-year" className={`${inputCls} w-full`}>
-                    <SelectValue placeholder="Select year" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>{GRADUATION_YEARS.map((y) => <SelectItem key={y} value={y.toString()}>{y}</SelectItem>)}</SelectContent>
-              </Select>
+              <FormControl><Input {...field} value={field.value ?? ""} type="number" id="alumni-grad-year" placeholder="e.g. 2024" className={inputCls} /></FormControl>
               <FormMessage className="text-red-300 text-xs" />
             </FormItem>
           )} />
+
         </div>
 
         <Button id="alumni-register-submit" type="submit" disabled={form.formState.isSubmitting} className="w-full h-11 bg-gradient-to-r from-pclu-sky-600 to-pclu-sky-500 hover:from-pclu-sky-500 hover:to-pclu-sky-400 text-white font-semibold shadow-lg">

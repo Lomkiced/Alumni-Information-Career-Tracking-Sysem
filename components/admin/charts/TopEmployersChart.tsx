@@ -3,6 +3,7 @@
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
 } from "recharts";
+import { ClientOnly } from "@/components/shared/ClientOnly";
 
 interface TopEmployersChartProps {
   data: Array<{ employer: string; count: number }>;
@@ -32,30 +33,32 @@ export function TopEmployersChart({ data }: TopEmployersChartProps) {
   const formatted = data.map(d => ({ ...d, employer: truncate(d.employer) }));
 
   return (
-    <ResponsiveContainer width="100%" height={280}>
-      <BarChart
-        data={formatted}
-        layout="vertical"
-        margin={{ top: 8, right: 24, left: 120, bottom: 8 }}
-      >
-        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" horizontal={false} />
-        <XAxis type="number" tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }} allowDecimals={false} />
-        <YAxis
-          type="category"
-          dataKey="employer"
-          tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
-          width={120}
-        />
-        <Tooltip content={<CustomTooltip />} />
-        <Bar dataKey="count" radius={[0, 4, 4, 0]}>
-          {formatted.map((_, i) => (
-            <Cell
-              key={i}
-              fill={`hsl(${210 + i * 8}, ${70 - i * 3}%, ${45 + i * 2}%)`}
-            />
-          ))}
-        </Bar>
-      </BarChart>
-    </ResponsiveContainer>
+    <ClientOnly fallback={<div className="h-[280px] w-full bg-muted/20 animate-pulse rounded-xl" />}>
+      <ResponsiveContainer width="100%" height={280}>
+        <BarChart
+          data={formatted}
+          layout="vertical"
+          margin={{ top: 8, right: 24, left: 120, bottom: 8 }}
+        >
+          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" horizontal={false} />
+          <XAxis type="number" tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }} allowDecimals={false} />
+          <YAxis
+            type="category"
+            dataKey="employer"
+            tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
+            width={120}
+          />
+          <Tooltip content={<CustomTooltip />} />
+          <Bar dataKey="count" radius={[0, 4, 4, 0]}>
+            {formatted.map((_, i) => (
+              <Cell
+                key={i}
+                fill={`hsl(${210 + i * 8}, ${70 - i * 3}%, ${45 + i * 2}%)`}
+              />
+            ))}
+          </Bar>
+        </BarChart>
+      </ResponsiveContainer>
+    </ClientOnly>
   );
 }

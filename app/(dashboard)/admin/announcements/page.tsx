@@ -1,12 +1,13 @@
 "use client";
 // app/(dashboard)/admin/announcements/page.tsx
 import { useState, useEffect, useCallback } from "react";
-import { Megaphone, Plus, Trash2, Eye, EyeOff } from "lucide-react";
+import { Megaphone, Plus, Trash2, Eye, EyeOff, MessageSquare } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import Link from "next/link";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { EmptyState } from "@/components/shared/EmptyState";
+import { CommentSection } from "@/components/shared/CommentSection";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { Button, buttonVariants } from "@/components/ui/button";
 
@@ -33,6 +34,7 @@ export default function AdminAnnouncementsPage() {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const fetchAnnouncements = useCallback(async () => {
     setLoading(true);
@@ -87,46 +89,64 @@ export default function AdminAnnouncementsPage() {
         />
       ) : (
         <div className="space-y-3">
-          {announcements.map(ann => (
-            <div key={ann.id} className="rounded-xl border border-border bg-card p-4 flex items-center gap-4 hover:shadow-sm transition-shadow">
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className={`text-xs font-medium px-2 py-0.5 rounded-full capitalize ${CATEGORY_COLORS[ann.category] ?? CATEGORY_COLORS.general}`}>
-                    {ann.category.replace("_", " ")}
-                  </span>
-                  {ann.is_published ? (
-                    <span className="text-xs text-emerald-500 font-medium">● Published</span>
-                  ) : (
-                    <span className="text-xs text-muted-foreground">○ Draft</span>
-                  )}
+          {announcements.map(ann => {
+            const isExpanded = expandedId === ann.id;
+            return (
+              <div key={ann.id} className="rounded-xl border border-border bg-card overflow-hidden hover:shadow-sm transition-shadow">
+                <div className="p-4 flex items-start gap-4">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className={`text-xs font-medium px-2 py-0.5 rounded-full capitalize ${CATEGORY_COLORS[ann.category] ?? CATEGORY_COLORS.general}`}>
+                        {ann.category.replace("_", " ")}
+                      </span>
+                      {ann.is_published ? (
+                        <span className="text-xs text-emerald-500 font-medium">● Published</span>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">○ Draft</span>
+                      )}
+                    </div>
+                    <p className="font-medium text-foreground truncate">{ann.title}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      By {ann.profiles?.full_name} · {format(new Date(ann.created_at), "MMM d, yyyy")}
+                      {ann.expires_at && ` · Expires ${format(new Date(ann.expires_at), "MMM d, yyyy")}`}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 gap-1.5"
+                      onClick={() => setExpandedId(isExpanded ? null : ann.id)}
+                    >
+                      <MessageSquare size={13} /> Discussions
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className={`h-8 gap-1.5 ${ann.is_published ? "text-muted-foreground" : "text-emerald-500 hover:bg-emerald-500/10"}`}
+                      onClick={() => handlePublishToggle(ann.id, ann.is_published)}
+                    >
+                      {ann.is_published ? <EyeOff size={13} /> : <Eye size={13} />}
+                      {ann.is_published ? "Unpublish" : "Publish"}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                      onClick={() => setDeleteId(ann.id)}
+                    >
+                      <Trash2 size={13} />
+                    </Button>
+                  </div>
                 </div>
-                <p className="font-medium text-foreground truncate">{ann.title}</p>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  By {ann.profiles?.full_name} · {format(new Date(ann.created_at), "MMM d, yyyy")}
-                  {ann.expires_at && ` · Expires ${format(new Date(ann.expires_at), "MMM d, yyyy")}`}
-                </p>
+                {isExpanded && (
+                  <div className="px-4 pb-4">
+                    <CommentSection announcementId={ann.id} />
+                  </div>
+                )}
               </div>
-              <div className="flex items-center gap-2 shrink-0">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className={`h-8 gap-1.5 ${ann.is_published ? "text-muted-foreground" : "text-emerald-500 hover:bg-emerald-500/10"}`}
-                  onClick={() => handlePublishToggle(ann.id, ann.is_published)}
-                >
-                  {ann.is_published ? <EyeOff size={13} /> : <Eye size={13} />}
-                  {ann.is_published ? "Unpublish" : "Publish"}
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 text-destructive hover:bg-destructive/10"
-                  onClick={() => setDeleteId(ann.id)}
-                >
-                  <Trash2 size={13} />
-                </Button>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
