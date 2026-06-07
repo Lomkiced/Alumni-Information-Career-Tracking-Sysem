@@ -230,6 +230,7 @@ exports.Prisma.AnnouncementScalarFieldEnum = {
   category: 'category',
   image_url: 'image_url',
   is_published: 'is_published',
+  is_pinned: 'is_pinned',
   published_at: 'published_at',
   expires_at: 'expires_at',
   created_at: 'created_at',

@@ -9546,6 +9546,7 @@ export namespace Prisma {
     category: string | null
     image_url: string | null
     is_published: boolean | null
+    is_pinned: boolean | null
     published_at: Date | null
     expires_at: Date | null
     created_at: Date | null
@@ -9560,6 +9561,7 @@ export namespace Prisma {
     category: string | null
     image_url: string | null
     is_published: boolean | null
+    is_pinned: boolean | null
     published_at: Date | null
     expires_at: Date | null
     created_at: Date | null
@@ -9574,6 +9576,7 @@ export namespace Prisma {
     category: number
     image_url: number
     is_published: number
+    is_pinned: number
     published_at: number
     expires_at: number
     created_at: number
@@ -9590,6 +9593,7 @@ export namespace Prisma {
     category?: true
     image_url?: true
     is_published?: true
+    is_pinned?: true
     published_at?: true
     expires_at?: true
     created_at?: true
@@ -9604,6 +9608,7 @@ export namespace Prisma {
     category?: true
     image_url?: true
     is_published?: true
+    is_pinned?: true
     published_at?: true
     expires_at?: true
     created_at?: true
@@ -9618,6 +9623,7 @@ export namespace Prisma {
     category?: true
     image_url?: true
     is_published?: true
+    is_pinned?: true
     published_at?: true
     expires_at?: true
     created_at?: true
@@ -9705,6 +9711,7 @@ export namespace Prisma {
     category: string
     image_url: string | null
     is_published: boolean
+    is_pinned: boolean
     published_at: Date | null
     expires_at: Date | null
     created_at: Date
@@ -9736,6 +9743,7 @@ export namespace Prisma {
     category?: boolean
     image_url?: boolean
     is_published?: boolean
+    is_pinned?: boolean
     published_at?: boolean
     expires_at?: boolean
     created_at?: boolean
@@ -9751,6 +9759,7 @@ export namespace Prisma {
     category?: boolean
     image_url?: boolean
     is_published?: boolean
+    is_pinned?: boolean
     published_at?: boolean
     expires_at?: boolean
     created_at?: boolean
@@ -9766,6 +9775,7 @@ export namespace Prisma {
     category?: boolean
     image_url?: boolean
     is_published?: boolean
+    is_pinned?: boolean
     published_at?: boolean
     expires_at?: boolean
     created_at?: boolean
@@ -9781,13 +9791,14 @@ export namespace Prisma {
     category?: boolean
     image_url?: boolean
     is_published?: boolean
+    is_pinned?: boolean
     published_at?: boolean
     expires_at?: boolean
     created_at?: boolean
     updated_at?: boolean
   }
 
-  export type AnnouncementOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "admin_id" | "title" | "content" | "category" | "image_url" | "is_published" | "published_at" | "expires_at" | "created_at" | "updated_at", ExtArgs["result"]["announcement"]>
+  export type AnnouncementOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "admin_id" | "title" | "content" | "category" | "image_url" | "is_published" | "is_pinned" | "published_at" | "expires_at" | "created_at" | "updated_at", ExtArgs["result"]["announcement"]>
   export type AnnouncementInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     admin?: boolean | ProfileDefaultArgs<ExtArgs>
   }
@@ -9811,6 +9822,7 @@ export namespace Prisma {
       category: string
       image_url: string | null
       is_published: boolean
+      is_pinned: boolean
       published_at: Date | null
       expires_at: Date | null
       created_at: Date
@@ -10246,6 +10258,7 @@ export namespace Prisma {
     readonly category: FieldRef<"Announcement", 'String'>
     readonly image_url: FieldRef<"Announcement", 'String'>
     readonly is_published: FieldRef<"Announcement", 'Boolean'>
+    readonly is_pinned: FieldRef<"Announcement", 'Boolean'>
     readonly published_at: FieldRef<"Announcement", 'DateTime'>
     readonly expires_at: FieldRef<"Announcement", 'DateTime'>
     readonly created_at: FieldRef<"Announcement", 'DateTime'>
@@ -15237,6 +15250,7 @@ export namespace Prisma {
     category: 'category',
     image_url: 'image_url',
     is_published: 'is_published',
+    is_pinned: 'is_pinned',
     published_at: 'published_at',
     expires_at: 'expires_at',
     created_at: 'created_at',
@@ -16097,6 +16111,7 @@ export namespace Prisma {
     category?: StringFilter<"Announcement"> | string
     image_url?: StringNullableFilter<"Announcement"> | string | null
     is_published?: BoolFilter<"Announcement"> | boolean
+    is_pinned?: BoolFilter<"Announcement"> | boolean
     published_at?: DateTimeNullableFilter<"Announcement"> | Date | string | null
     expires_at?: DateTimeNullableFilter<"Announcement"> | Date | string | null
     created_at?: DateTimeFilter<"Announcement"> | Date | string
@@ -16112,6 +16127,7 @@ export namespace Prisma {
     category?: SortOrder
     image_url?: SortOrderInput | SortOrder
     is_published?: SortOrder
+    is_pinned?: SortOrder
     published_at?: SortOrderInput | SortOrder
     expires_at?: SortOrderInput | SortOrder
     created_at?: SortOrder
@@ -16130,6 +16146,7 @@ export namespace Prisma {
     category?: StringFilter<"Announcement"> | string
     image_url?: StringNullableFilter<"Announcement"> | string | null
     is_published?: BoolFilter<"Announcement"> | boolean
+    is_pinned?: BoolFilter<"Announcement"> | boolean
     published_at?: DateTimeNullableFilter<"Announcement"> | Date | string | null
     expires_at?: DateTimeNullableFilter<"Announcement"> | Date | string | null
     created_at?: DateTimeFilter<"Announcement"> | Date | string
@@ -16145,6 +16162,7 @@ export namespace Prisma {
     category?: SortOrder
     image_url?: SortOrderInput | SortOrder
     is_published?: SortOrder
+    is_pinned?: SortOrder
     published_at?: SortOrderInput | SortOrder
     expires_at?: SortOrderInput | SortOrder
     created_at?: SortOrder
@@ -16165,6 +16183,7 @@ export namespace Prisma {
     category?: StringWithAggregatesFilter<"Announcement"> | string
     image_url?: StringNullableWithAggregatesFilter<"Announcement"> | string | null
     is_published?: BoolWithAggregatesFilter<"Announcement"> | boolean
+    is_pinned?: BoolWithAggregatesFilter<"Announcement"> | boolean
     published_at?: DateTimeNullableWithAggregatesFilter<"Announcement"> | Date | string | null
     expires_at?: DateTimeNullableWithAggregatesFilter<"Announcement"> | Date | string | null
     created_at?: DateTimeWithAggregatesFilter<"Announcement"> | Date | string
@@ -17212,6 +17231,7 @@ export namespace Prisma {
     category?: string
     image_url?: string | null
     is_published?: boolean
+    is_pinned?: boolean
     published_at?: Date | string | null
     expires_at?: Date | string | null
     created_at?: Date | string
@@ -17227,6 +17247,7 @@ export namespace Prisma {
     category?: string
     image_url?: string | null
     is_published?: boolean
+    is_pinned?: boolean
     published_at?: Date | string | null
     expires_at?: Date | string | null
     created_at?: Date | string
@@ -17240,6 +17261,7 @@ export namespace Prisma {
     category?: StringFieldUpdateOperationsInput | string
     image_url?: NullableStringFieldUpdateOperationsInput | string | null
     is_published?: BoolFieldUpdateOperationsInput | boolean
+    is_pinned?: BoolFieldUpdateOperationsInput | boolean
     published_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     expires_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -17255,6 +17277,7 @@ export namespace Prisma {
     category?: StringFieldUpdateOperationsInput | string
     image_url?: NullableStringFieldUpdateOperationsInput | string | null
     is_published?: BoolFieldUpdateOperationsInput | boolean
+    is_pinned?: BoolFieldUpdateOperationsInput | boolean
     published_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     expires_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -17269,6 +17292,7 @@ export namespace Prisma {
     category?: string
     image_url?: string | null
     is_published?: boolean
+    is_pinned?: boolean
     published_at?: Date | string | null
     expires_at?: Date | string | null
     created_at?: Date | string
@@ -17282,6 +17306,7 @@ export namespace Prisma {
     category?: StringFieldUpdateOperationsInput | string
     image_url?: NullableStringFieldUpdateOperationsInput | string | null
     is_published?: BoolFieldUpdateOperationsInput | boolean
+    is_pinned?: BoolFieldUpdateOperationsInput | boolean
     published_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     expires_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -17296,6 +17321,7 @@ export namespace Prisma {
     category?: StringFieldUpdateOperationsInput | string
     image_url?: NullableStringFieldUpdateOperationsInput | string | null
     is_published?: BoolFieldUpdateOperationsInput | boolean
+    is_pinned?: BoolFieldUpdateOperationsInput | boolean
     published_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     expires_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -18301,6 +18327,7 @@ export namespace Prisma {
     category?: SortOrder
     image_url?: SortOrder
     is_published?: SortOrder
+    is_pinned?: SortOrder
     published_at?: SortOrder
     expires_at?: SortOrder
     created_at?: SortOrder
@@ -18315,6 +18342,7 @@ export namespace Prisma {
     category?: SortOrder
     image_url?: SortOrder
     is_published?: SortOrder
+    is_pinned?: SortOrder
     published_at?: SortOrder
     expires_at?: SortOrder
     created_at?: SortOrder
@@ -18329,6 +18357,7 @@ export namespace Prisma {
     category?: SortOrder
     image_url?: SortOrder
     is_published?: SortOrder
+    is_pinned?: SortOrder
     published_at?: SortOrder
     expires_at?: SortOrder
     created_at?: SortOrder
@@ -19753,6 +19782,7 @@ export namespace Prisma {
     category?: string
     image_url?: string | null
     is_published?: boolean
+    is_pinned?: boolean
     published_at?: Date | string | null
     expires_at?: Date | string | null
     created_at?: Date | string
@@ -19766,6 +19796,7 @@ export namespace Prisma {
     category?: string
     image_url?: string | null
     is_published?: boolean
+    is_pinned?: boolean
     published_at?: Date | string | null
     expires_at?: Date | string | null
     created_at?: Date | string
@@ -20089,6 +20120,7 @@ export namespace Prisma {
     category?: StringFilter<"Announcement"> | string
     image_url?: StringNullableFilter<"Announcement"> | string | null
     is_published?: BoolFilter<"Announcement"> | boolean
+    is_pinned?: BoolFilter<"Announcement"> | boolean
     published_at?: DateTimeNullableFilter<"Announcement"> | Date | string | null
     expires_at?: DateTimeNullableFilter<"Announcement"> | Date | string | null
     created_at?: DateTimeFilter<"Announcement"> | Date | string
@@ -21945,6 +21977,7 @@ export namespace Prisma {
     category?: string
     image_url?: string | null
     is_published?: boolean
+    is_pinned?: boolean
     published_at?: Date | string | null
     expires_at?: Date | string | null
     created_at?: Date | string
@@ -22063,6 +22096,7 @@ export namespace Prisma {
     category?: StringFieldUpdateOperationsInput | string
     image_url?: NullableStringFieldUpdateOperationsInput | string | null
     is_published?: BoolFieldUpdateOperationsInput | boolean
+    is_pinned?: BoolFieldUpdateOperationsInput | boolean
     published_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     expires_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -22076,6 +22110,7 @@ export namespace Prisma {
     category?: StringFieldUpdateOperationsInput | string
     image_url?: NullableStringFieldUpdateOperationsInput | string | null
     is_published?: BoolFieldUpdateOperationsInput | boolean
+    is_pinned?: BoolFieldUpdateOperationsInput | boolean
     published_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     expires_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -22089,6 +22124,7 @@ export namespace Prisma {
     category?: StringFieldUpdateOperationsInput | string
     image_url?: NullableStringFieldUpdateOperationsInput | string | null
     is_published?: BoolFieldUpdateOperationsInput | boolean
+    is_pinned?: BoolFieldUpdateOperationsInput | boolean
     published_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     expires_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string

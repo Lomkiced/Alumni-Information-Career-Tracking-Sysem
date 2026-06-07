@@ -11,6 +11,7 @@ const updateSchema = z.object({
   category: z.enum(["general", "event", "job_fair", "seminar", "alumni_news"]).optional(),
   image_url: z.string().optional(),
   is_published: z.boolean().optional(),
+  is_pinned: z.boolean().optional(),
   expires_at: z.string().optional(),
 });
 
@@ -34,6 +35,19 @@ export async function PATCH(
 
     const d = parsed.data;
     const adminClient = createAdminClient();
+
+    // Check pinned limit
+    if (d.is_pinned === true) {
+      const { count, error: countErr } = await (adminClient as any)
+        .from("announcements")
+        .select("*", { count: "exact", head: true })
+        .eq("is_pinned", true);
+      
+      if (countErr) throw countErr;
+      if (count !== null && count >= 3) {
+        return Response.json({ error: "Maximum of 3 announcements can be pinned at a time." }, { status: 400 });
+      }
+    }
 
     // Check if being published for first time
     const { data: existing } = (await adminClient

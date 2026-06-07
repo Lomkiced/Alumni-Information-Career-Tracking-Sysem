@@ -10,6 +10,7 @@ import { formatInitials } from "@/lib/utils/format";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import Link from "next/link";
 
 interface CommentProfile {
   full_name: string;
@@ -119,20 +120,22 @@ export function CommentSection({ announcementId }: CommentSectionProps) {
           <div className="absolute -left-5 top-4 border-l-2 border-b-2 border-border w-4 h-4 rounded-bl-xl opacity-50" />
         )}
         
-        <Avatar className={`shrink-0 ${isReply ? "w-8 h-8" : "w-10 h-10"} ring-2 ring-background`}>
-          <AvatarImage src={comment.profiles?.profile_photo_url ?? ""} />
-          <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
-            {formatInitials(comment.profiles?.full_name ?? "Unknown User")}
-          </AvatarFallback>
-        </Avatar>
+        <Link href={`/network/${comment.user_id}`} className="shrink-0 transition-opacity hover:opacity-80">
+          <Avatar className={`${isReply ? "w-8 h-8" : "w-10 h-10"} ring-2 ring-background`}>
+            <AvatarImage src={comment.profiles?.profile_photo_url ?? ""} />
+            <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
+              {formatInitials(comment.profiles?.full_name ?? "Unknown User")}
+            </AvatarFallback>
+          </Avatar>
+        </Link>
 
         <div className="flex-1 min-w-0">
           <div className="bg-muted/40 rounded-2xl px-4 py-3 border border-border/50 relative group">
             <div className="flex items-center justify-between gap-2 mb-1">
               <div className="flex items-center gap-2">
-                <span className="font-semibold text-sm text-foreground">
+                <Link href={`/network/${comment.user_id}`} className="font-semibold text-sm text-foreground hover:underline">
                   {comment.profiles?.full_name ?? "Unknown User"}
-                </span>
+                </Link>
                 {isAuthorAdmin && (
                   <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded-md bg-primary/10 text-primary">Admin</span>
                 )}
