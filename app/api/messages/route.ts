@@ -107,3 +107,28 @@ export async function POST(request: NextRequest) {
     return Response.json({ error: "Internal server error" }, { status: 500 });
   }
 }
+
+// DELETE /api/messages?messageId=<id>
+export async function DELETE(request: NextRequest) {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return Response.json({ error: "Unauthorized" }, { status: 401 });
+
+    const searchParams = request.nextUrl.searchParams;
+    const messageId = searchParams.get("messageId");
+    if (!messageId) return Response.json({ error: "Missing messageId" }, { status: 400 });
+
+    const message = await prisma.message.findUnique({ where: { id: messageId } });
+    if (!message || message.sender_id !== user.id) {
+      return Response.json({ error: "Message not found or unauthorized" }, { status: 404 });
+    }
+
+    await prisma.message.delete({ where: { id: messageId } });
+
+    return Response.json({ success: true }, { status: 200 });
+  } catch (error) {
+    console.error("[DELETE /api/messages]", error);
+    return Response.json({ error: "Internal server error" }, { status: 500 });
+  }
+}

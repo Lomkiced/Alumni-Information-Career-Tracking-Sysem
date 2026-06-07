@@ -61,3 +61,27 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    const searchParams = request.nextUrl.searchParams;
+    const id = searchParams.get("id");
+    if (!id) return NextResponse.json({ error: "Missing conversation id" }, { status: 400 });
+
+    const conversation = await prisma.conversation.findUnique({ where: { id } });
+    if (!conversation) return NextResponse.json({ error: "Conversation not found" }, { status: 404 });
+    if (conversation.user1_id !== user.id && conversation.user2_id !== user.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    }
+
+    await prisma.conversation.delete({ where: { id } });
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("[DELETE /api/messages/conversations]", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
+}
