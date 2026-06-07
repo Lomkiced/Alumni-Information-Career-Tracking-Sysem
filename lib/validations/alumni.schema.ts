@@ -16,6 +16,7 @@ export const alumniProfileSchema = z.object({
   major: z.string().optional(),
   is_profile_public: z.boolean().default(true),
   course: z.string().optional(),
+  resume_url: z.string().optional(),
 });
 
 export type AlumniProfileInput = z.infer<typeof alumniProfileSchema>;

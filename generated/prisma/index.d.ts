@@ -3056,6 +3056,7 @@ export namespace Prisma {
     city: string | null
     province: string | null
     linkedin_url: string | null
+    resume_url: string | null
     is_profile_public: boolean | null
     created_at: Date | null
     updated_at: Date | null
@@ -3072,6 +3073,7 @@ export namespace Prisma {
     city: string | null
     province: string | null
     linkedin_url: string | null
+    resume_url: string | null
     is_profile_public: boolean | null
     created_at: Date | null
     updated_at: Date | null
@@ -3088,6 +3090,7 @@ export namespace Prisma {
     city: number
     province: number
     linkedin_url: number
+    resume_url: number
     is_profile_public: number
     created_at: number
     updated_at: number
@@ -3116,6 +3119,7 @@ export namespace Prisma {
     city?: true
     province?: true
     linkedin_url?: true
+    resume_url?: true
     is_profile_public?: true
     created_at?: true
     updated_at?: true
@@ -3132,6 +3136,7 @@ export namespace Prisma {
     city?: true
     province?: true
     linkedin_url?: true
+    resume_url?: true
     is_profile_public?: true
     created_at?: true
     updated_at?: true
@@ -3148,6 +3153,7 @@ export namespace Prisma {
     city?: true
     province?: true
     linkedin_url?: true
+    resume_url?: true
     is_profile_public?: true
     created_at?: true
     updated_at?: true
@@ -3251,6 +3257,7 @@ export namespace Prisma {
     city: string | null
     province: string | null
     linkedin_url: string | null
+    resume_url: string | null
     is_profile_public: boolean
     created_at: Date
     updated_at: Date
@@ -3286,6 +3293,7 @@ export namespace Prisma {
     city?: boolean
     province?: boolean
     linkedin_url?: boolean
+    resume_url?: boolean
     is_profile_public?: boolean
     created_at?: boolean
     updated_at?: boolean
@@ -3306,6 +3314,7 @@ export namespace Prisma {
     city?: boolean
     province?: boolean
     linkedin_url?: boolean
+    resume_url?: boolean
     is_profile_public?: boolean
     created_at?: boolean
     updated_at?: boolean
@@ -3323,6 +3332,7 @@ export namespace Prisma {
     city?: boolean
     province?: boolean
     linkedin_url?: boolean
+    resume_url?: boolean
     is_profile_public?: boolean
     created_at?: boolean
     updated_at?: boolean
@@ -3340,12 +3350,13 @@ export namespace Prisma {
     city?: boolean
     province?: boolean
     linkedin_url?: boolean
+    resume_url?: boolean
     is_profile_public?: boolean
     created_at?: boolean
     updated_at?: boolean
   }
 
-  export type AlumniOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "student_id" | "course" | "major" | "batch_year" | "graduation_year" | "address" | "city" | "province" | "linkedin_url" | "is_profile_public" | "created_at" | "updated_at", ExtArgs["result"]["alumni"]>
+  export type AlumniOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "student_id" | "course" | "major" | "batch_year" | "graduation_year" | "address" | "city" | "province" | "linkedin_url" | "resume_url" | "is_profile_public" | "created_at" | "updated_at", ExtArgs["result"]["alumni"]>
   export type AlumniInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     profile?: boolean | ProfileDefaultArgs<ExtArgs>
     career_records?: boolean | Alumni$career_recordsArgs<ExtArgs>
@@ -3377,6 +3388,7 @@ export namespace Prisma {
       city: string | null
       province: string | null
       linkedin_url: string | null
+      resume_url: string | null
       is_profile_public: boolean
       created_at: Date
       updated_at: Date
@@ -3816,6 +3828,7 @@ export namespace Prisma {
     readonly city: FieldRef<"Alumni", 'String'>
     readonly province: FieldRef<"Alumni", 'String'>
     readonly linkedin_url: FieldRef<"Alumni", 'String'>
+    readonly resume_url: FieldRef<"Alumni", 'String'>
     readonly is_profile_public: FieldRef<"Alumni", 'Boolean'>
     readonly created_at: FieldRef<"Alumni", 'DateTime'>
     readonly updated_at: FieldRef<"Alumni", 'DateTime'>
@@ -12588,6 +12601,7 @@ export namespace Prisma {
     city: 'city',
     province: 'province',
     linkedin_url: 'linkedin_url',
+    resume_url: 'resume_url',
     is_profile_public: 'is_profile_public',
     created_at: 'created_at',
     updated_at: 'updated_at'
@@ -12974,6 +12988,7 @@ export namespace Prisma {
     city?: StringNullableFilter<"Alumni"> | string | null
     province?: StringNullableFilter<"Alumni"> | string | null
     linkedin_url?: StringNullableFilter<"Alumni"> | string | null
+    resume_url?: StringNullableFilter<"Alumni"> | string | null
     is_profile_public?: BoolFilter<"Alumni"> | boolean
     created_at?: DateTimeFilter<"Alumni"> | Date | string
     updated_at?: DateTimeFilter<"Alumni"> | Date | string
@@ -12993,6 +13008,7 @@ export namespace Prisma {
     city?: SortOrderInput | SortOrder
     province?: SortOrderInput | SortOrder
     linkedin_url?: SortOrderInput | SortOrder
+    resume_url?: SortOrderInput | SortOrder
     is_profile_public?: SortOrder
     created_at?: SortOrder
     updated_at?: SortOrder
@@ -13015,6 +13031,7 @@ export namespace Prisma {
     city?: StringNullableFilter<"Alumni"> | string | null
     province?: StringNullableFilter<"Alumni"> | string | null
     linkedin_url?: StringNullableFilter<"Alumni"> | string | null
+    resume_url?: StringNullableFilter<"Alumni"> | string | null
     is_profile_public?: BoolFilter<"Alumni"> | boolean
     created_at?: DateTimeFilter<"Alumni"> | Date | string
     updated_at?: DateTimeFilter<"Alumni"> | Date | string
@@ -13034,6 +13051,7 @@ export namespace Prisma {
     city?: SortOrderInput | SortOrder
     province?: SortOrderInput | SortOrder
     linkedin_url?: SortOrderInput | SortOrder
+    resume_url?: SortOrderInput | SortOrder
     is_profile_public?: SortOrder
     created_at?: SortOrder
     updated_at?: SortOrder
@@ -13058,6 +13076,7 @@ export namespace Prisma {
     city?: StringNullableWithAggregatesFilter<"Alumni"> | string | null
     province?: StringNullableWithAggregatesFilter<"Alumni"> | string | null
     linkedin_url?: StringNullableWithAggregatesFilter<"Alumni"> | string | null
+    resume_url?: StringNullableWithAggregatesFilter<"Alumni"> | string | null
     is_profile_public?: BoolWithAggregatesFilter<"Alumni"> | boolean
     created_at?: DateTimeWithAggregatesFilter<"Alumni"> | Date | string
     updated_at?: DateTimeWithAggregatesFilter<"Alumni"> | Date | string
@@ -13848,6 +13867,7 @@ export namespace Prisma {
     city?: string | null
     province?: string | null
     linkedin_url?: string | null
+    resume_url?: string | null
     is_profile_public?: boolean
     created_at?: Date | string
     updated_at?: Date | string
@@ -13867,6 +13887,7 @@ export namespace Prisma {
     city?: string | null
     province?: string | null
     linkedin_url?: string | null
+    resume_url?: string | null
     is_profile_public?: boolean
     created_at?: Date | string
     updated_at?: Date | string
@@ -13884,6 +13905,7 @@ export namespace Prisma {
     city?: NullableStringFieldUpdateOperationsInput | string | null
     province?: NullableStringFieldUpdateOperationsInput | string | null
     linkedin_url?: NullableStringFieldUpdateOperationsInput | string | null
+    resume_url?: NullableStringFieldUpdateOperationsInput | string | null
     is_profile_public?: BoolFieldUpdateOperationsInput | boolean
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -13903,6 +13925,7 @@ export namespace Prisma {
     city?: NullableStringFieldUpdateOperationsInput | string | null
     province?: NullableStringFieldUpdateOperationsInput | string | null
     linkedin_url?: NullableStringFieldUpdateOperationsInput | string | null
+    resume_url?: NullableStringFieldUpdateOperationsInput | string | null
     is_profile_public?: BoolFieldUpdateOperationsInput | boolean
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -13921,6 +13944,7 @@ export namespace Prisma {
     city?: string | null
     province?: string | null
     linkedin_url?: string | null
+    resume_url?: string | null
     is_profile_public?: boolean
     created_at?: Date | string
     updated_at?: Date | string
@@ -13936,6 +13960,7 @@ export namespace Prisma {
     city?: NullableStringFieldUpdateOperationsInput | string | null
     province?: NullableStringFieldUpdateOperationsInput | string | null
     linkedin_url?: NullableStringFieldUpdateOperationsInput | string | null
+    resume_url?: NullableStringFieldUpdateOperationsInput | string | null
     is_profile_public?: BoolFieldUpdateOperationsInput | boolean
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -13952,6 +13977,7 @@ export namespace Prisma {
     city?: NullableStringFieldUpdateOperationsInput | string | null
     province?: NullableStringFieldUpdateOperationsInput | string | null
     linkedin_url?: NullableStringFieldUpdateOperationsInput | string | null
+    resume_url?: NullableStringFieldUpdateOperationsInput | string | null
     is_profile_public?: BoolFieldUpdateOperationsInput | boolean
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -14984,6 +15010,7 @@ export namespace Prisma {
     city?: SortOrder
     province?: SortOrder
     linkedin_url?: SortOrder
+    resume_url?: SortOrder
     is_profile_public?: SortOrder
     created_at?: SortOrder
     updated_at?: SortOrder
@@ -15005,6 +15032,7 @@ export namespace Prisma {
     city?: SortOrder
     province?: SortOrder
     linkedin_url?: SortOrder
+    resume_url?: SortOrder
     is_profile_public?: SortOrder
     created_at?: SortOrder
     updated_at?: SortOrder
@@ -15021,6 +15049,7 @@ export namespace Prisma {
     city?: SortOrder
     province?: SortOrder
     linkedin_url?: SortOrder
+    resume_url?: SortOrder
     is_profile_public?: SortOrder
     created_at?: SortOrder
     updated_at?: SortOrder
@@ -16421,6 +16450,7 @@ export namespace Prisma {
     city?: string | null
     province?: string | null
     linkedin_url?: string | null
+    resume_url?: string | null
     is_profile_public?: boolean
     created_at?: Date | string
     updated_at?: Date | string
@@ -16438,6 +16468,7 @@ export namespace Prisma {
     city?: string | null
     province?: string | null
     linkedin_url?: string | null
+    resume_url?: string | null
     is_profile_public?: boolean
     created_at?: Date | string
     updated_at?: Date | string
@@ -16658,6 +16689,7 @@ export namespace Prisma {
     city?: NullableStringFieldUpdateOperationsInput | string | null
     province?: NullableStringFieldUpdateOperationsInput | string | null
     linkedin_url?: NullableStringFieldUpdateOperationsInput | string | null
+    resume_url?: NullableStringFieldUpdateOperationsInput | string | null
     is_profile_public?: BoolFieldUpdateOperationsInput | boolean
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -16675,6 +16707,7 @@ export namespace Prisma {
     city?: NullableStringFieldUpdateOperationsInput | string | null
     province?: NullableStringFieldUpdateOperationsInput | string | null
     linkedin_url?: NullableStringFieldUpdateOperationsInput | string | null
+    resume_url?: NullableStringFieldUpdateOperationsInput | string | null
     is_profile_public?: BoolFieldUpdateOperationsInput | boolean
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -17374,6 +17407,7 @@ export namespace Prisma {
     city?: string | null
     province?: string | null
     linkedin_url?: string | null
+    resume_url?: string | null
     is_profile_public?: boolean
     created_at?: Date | string
     updated_at?: Date | string
@@ -17392,6 +17426,7 @@ export namespace Prisma {
     city?: string | null
     province?: string | null
     linkedin_url?: string | null
+    resume_url?: string | null
     is_profile_public?: boolean
     created_at?: Date | string
     updated_at?: Date | string
@@ -17424,6 +17459,7 @@ export namespace Prisma {
     city?: NullableStringFieldUpdateOperationsInput | string | null
     province?: NullableStringFieldUpdateOperationsInput | string | null
     linkedin_url?: NullableStringFieldUpdateOperationsInput | string | null
+    resume_url?: NullableStringFieldUpdateOperationsInput | string | null
     is_profile_public?: BoolFieldUpdateOperationsInput | boolean
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -17442,6 +17478,7 @@ export namespace Prisma {
     city?: NullableStringFieldUpdateOperationsInput | string | null
     province?: NullableStringFieldUpdateOperationsInput | string | null
     linkedin_url?: NullableStringFieldUpdateOperationsInput | string | null
+    resume_url?: NullableStringFieldUpdateOperationsInput | string | null
     is_profile_public?: BoolFieldUpdateOperationsInput | boolean
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -17641,6 +17678,7 @@ export namespace Prisma {
     city?: string | null
     province?: string | null
     linkedin_url?: string | null
+    resume_url?: string | null
     is_profile_public?: boolean
     created_at?: Date | string
     updated_at?: Date | string
@@ -17659,6 +17697,7 @@ export namespace Prisma {
     city?: string | null
     province?: string | null
     linkedin_url?: string | null
+    resume_url?: string | null
     is_profile_public?: boolean
     created_at?: Date | string
     updated_at?: Date | string
@@ -17744,6 +17783,7 @@ export namespace Prisma {
     city?: NullableStringFieldUpdateOperationsInput | string | null
     province?: NullableStringFieldUpdateOperationsInput | string | null
     linkedin_url?: NullableStringFieldUpdateOperationsInput | string | null
+    resume_url?: NullableStringFieldUpdateOperationsInput | string | null
     is_profile_public?: BoolFieldUpdateOperationsInput | boolean
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -17762,6 +17802,7 @@ export namespace Prisma {
     city?: NullableStringFieldUpdateOperationsInput | string | null
     province?: NullableStringFieldUpdateOperationsInput | string | null
     linkedin_url?: NullableStringFieldUpdateOperationsInput | string | null
+    resume_url?: NullableStringFieldUpdateOperationsInput | string | null
     is_profile_public?: BoolFieldUpdateOperationsInput | boolean
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string

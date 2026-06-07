@@ -144,6 +144,7 @@ exports.Prisma.AlumniScalarFieldEnum = {
   city: 'city',
   province: 'province',
   linkedin_url: 'linkedin_url',
+  resume_url: 'resume_url',
   is_profile_public: 'is_profile_public',
   created_at: 'created_at',
   updated_at: 'updated_at'
