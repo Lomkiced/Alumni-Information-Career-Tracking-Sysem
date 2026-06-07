@@ -36,8 +36,15 @@ export async function PATCH(
     const d = parsed.data;
     const adminClient = createAdminClient();
 
-    // Check pinned limit
-    if (d.is_pinned === true) {
+    // Fetch existing record first to see if it's already pinned
+    const { data: existing } = (await adminClient
+      .from("announcements")
+      .select("is_published, is_pinned, title")
+      .eq("id", id)
+      .single()) as { data: { is_published: boolean; is_pinned: boolean; title: string } | null };
+
+    // Check pinned limit ONLY if we are newly pinning an unpinned announcement
+    if (d.is_pinned === true && !existing?.is_pinned) {
       const { count, error: countErr } = await (adminClient as any)
         .from("announcements")
         .select("*", { count: "exact", head: true })
@@ -48,13 +55,6 @@ export async function PATCH(
         return Response.json({ error: "Maximum of 3 announcements can be pinned at a time." }, { status: 400 });
       }
     }
-
-    // Check if being published for first time
-    const { data: existing } = (await adminClient
-      .from("announcements")
-      .select("is_published, title")
-      .eq("id", id)
-      .single()) as { data: { is_published: boolean; title: string } | null };
 
     const updateData: Record<string, unknown> = { ...d, updated_at: new Date().toISOString() };
     if (d.is_published && !existing?.is_published) {
