@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import {
   User, Briefcase, Megaphone, LayoutDashboard, Users,
   Building2, FileText, BarChart3, ScrollText, Award,
-  PlusCircle, UserCheck, ChevronRight, LogOut, X,
+  PlusCircle, UserCheck, ChevronRight, LogOut, X, MessageCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -17,12 +17,14 @@ const ALUMNI_MENU = [
   { href: "/alumni/profile", icon: User, label: "My Profile" },
   { href: "/alumni/career", icon: Briefcase, label: "Career History" },
   { href: "/alumni/jobs", icon: FileText, label: "Job Board" },
+  { href: "/messages", icon: MessageCircle, label: "Messages" },
   { href: "/alumni/announcements", icon: Megaphone, label: "Announcements" },
 ];
 
 const EMPLOYER_MENU = [
   { href: "/employer/jobs", icon: Briefcase, label: "My Job Postings" },
   { href: "/employer/applicants", icon: UserCheck, label: "Applicants" },
+  { href: "/messages", icon: MessageCircle, label: "Messages" },
   { href: "/employer/profile", icon: Building2, label: "Company Profile" },
 ];
 
@@ -31,6 +33,7 @@ const ADMIN_MENU = [
   { href: "/admin/alumni", icon: Users, label: "Alumni" },
   { href: "/admin/employers", icon: Building2, label: "Employers" },
   { href: "/admin/jobs", icon: Briefcase, label: "Job Moderation" },
+  { href: "/messages", icon: MessageCircle, label: "Messages" },
   { href: "/admin/reports", icon: BarChart3, label: "Reports & Analytics" },
   { href: "/admin/announcements", icon: Megaphone, label: "Announcements" },
   { href: "/admin/audit-logs", icon: ScrollText, label: "Audit Logs" },

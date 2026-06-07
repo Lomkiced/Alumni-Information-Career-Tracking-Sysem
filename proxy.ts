@@ -46,6 +46,8 @@ export async function proxy(request: NextRequest) {
     "/forgot-password",
     "/api/auth/callback",
     "/api/cron/",
+    "/api/search",
+    "/api/messages",
     "/_next",
     "/favicon",
   ];

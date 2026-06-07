@@ -130,7 +130,9 @@ exports.Prisma.ProfileScalarFieldEnum = {
   is_verified: 'is_verified',
   is_active: 'is_active',
   created_at: 'created_at',
-  updated_at: 'updated_at'
+  updated_at: 'updated_at',
+  birthdate: 'birthdate',
+  is_searchable: 'is_searchable'
 };
 
 exports.Prisma.AlumniScalarFieldEnum = {
@@ -258,6 +260,23 @@ exports.Prisma.NotificationScalarFieldEnum = {
   created_at: 'created_at'
 };
 
+exports.Prisma.ConversationScalarFieldEnum = {
+  id: 'id',
+  user1_id: 'user1_id',
+  user2_id: 'user2_id',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+};
+
+exports.Prisma.MessageScalarFieldEnum = {
+  id: 'id',
+  conversation_id: 'conversation_id',
+  sender_id: 'sender_id',
+  content: 'content',
+  is_read: 'is_read',
+  created_at: 'created_at'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -294,7 +313,9 @@ exports.Prisma.ModelName = {
   JobApplication: 'JobApplication',
   Announcement: 'Announcement',
   AuditLog: 'AuditLog',
-  Notification: 'Notification'
+  Notification: 'Notification',
+  Conversation: 'Conversation',
+  Message: 'Message'
 };
 
 /**

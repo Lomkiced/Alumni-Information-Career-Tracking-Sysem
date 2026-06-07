@@ -2,6 +2,7 @@
 // app/(dashboard)/layout.tsx
 import { Sidebar } from "@/components/shared/Sidebar";
 import { Navbar } from "@/components/shared/Navbar";
+import { FloatingChat } from "@/components/shared/FloatingChat";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -20,6 +21,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
         </main>
       </div>
+
+      {/* Global Floating Chat */}
+      <FloatingChat />
     </div>
   );
 }

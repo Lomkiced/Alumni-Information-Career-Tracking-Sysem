@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { NotificationBell } from "@/components/shared/NotificationBell";
 import { Sidebar } from "@/components/shared/Sidebar";
+import { GlobalSearch } from "@/components/shared/GlobalSearch";
 import { formatInitials } from "@/lib/utils/format";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -34,14 +35,19 @@ export function Navbar({ title }: NavbarProps) {
 
         {/* Page title */}
         {title && (
-          <div className="flex-1">
+          <div className="flex-1 shrink-0">
             <h1 className="font-heading font-semibold text-lg text-foreground">{title}</h1>
           </div>
         )}
-        {!title && <div className="flex-1" />}
+        {!title && <div className="flex-1 shrink-0" />}
+
+        {/* Global Search */}
+        <div className="flex-1 flex justify-center max-w-2xl w-full">
+          <GlobalSearch />
+        </div>
 
         {/* Right actions */}
-        <div className="flex items-center gap-3">
+        <div className="flex-1 flex justify-end items-center gap-3">
           <NotificationBell userId={profile?.id} />
           <Avatar className="h-10 w-10 ring-2 ring-primary/20 cursor-pointer hover:ring-primary/40 transition-all">
             <AvatarImage src={profile?.profile_photo_url ?? ""} alt={profile?.full_name ?? ""} />
