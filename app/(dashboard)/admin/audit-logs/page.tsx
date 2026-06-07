@@ -50,13 +50,14 @@ export default function AdminAuditLogsPage() {
   const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(20);
   const [action, setAction] = useState("");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
 
   const fetchLogs = useCallback(async () => {
     setLoading(true);
-    const params = new URLSearchParams({ page: String(page) });
+    const params = new URLSearchParams({ page: String(page), limit: String(limit) });
     if (action) params.set("action", action);
     if (dateFrom) params.set("from", dateFrom);
     if (dateTo) params.set("to", dateTo);
@@ -67,7 +68,7 @@ export default function AdminAuditLogsPage() {
       setTotal(count ?? 0);
     }
     setLoading(false);
-  }, [page, action, dateFrom, dateTo]);
+  }, [page, limit, action, dateFrom, dateTo]);
 
   useEffect(() => { fetchLogs(); }, [fetchLogs]);
 
@@ -180,14 +181,34 @@ export default function AdminAuditLogsPage() {
       )}
 
       {/* Pagination */}
-      {total > 20 && (
-        <div className="flex items-center justify-between text-sm text-muted-foreground">
-          <span>Showing {((page - 1) * 20) + 1}–{Math.min(page * 20, total)} of {total} logs</span>
+      {total > 0 && (
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground bg-card p-4 rounded-xl border border-border shadow-sm">
+          <div className="flex items-center gap-3">
+            <span>Showing {((page - 1) * limit) + 1}–{Math.min(page * limit, total)} of {total} logs</span>
+            <div className="h-4 w-px bg-border hidden sm:block" />
+            <div className="flex items-center gap-2">
+              <span>Rows per page:</span>
+              <Select value={String(limit)} onValueChange={(v) => { setLimit(Number(v)); setPage(1); }}>
+                <SelectTrigger className="h-8 w-[70px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="10">10</SelectItem>
+                  <SelectItem value="20">20</SelectItem>
+                  <SelectItem value="50">50</SelectItem>
+                  <SelectItem value="100">100</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={() => setPage(p => p - 1)} disabled={page === 1}>
+            <Button variant="outline" size="sm" onClick={() => setPage(p => p - 1)} disabled={page === 1} className="h-8">
               <ChevronLeft size={14} className="mr-1" /> Previous
             </Button>
-            <Button variant="outline" size="sm" onClick={() => setPage(p => p + 1)} disabled={page * 20 >= total}>
+            <div className="flex items-center px-2 font-medium text-foreground text-xs">
+              Page {page} of {Math.ceil(total / limit)}
+            </div>
+            <Button variant="outline" size="sm" onClick={() => setPage(p => p + 1)} disabled={page * limit >= total} className="h-8">
               Next <ChevronRight size={14} className="ml-1" />
             </Button>
           </div>

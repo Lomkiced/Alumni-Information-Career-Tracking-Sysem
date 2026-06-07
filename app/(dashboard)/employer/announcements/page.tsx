@@ -31,7 +31,7 @@ const CATEGORY_CONFIG: Record<string, { label: string; color: string }> = {
   alumni_news:{ label: "Alumni News",    color: "bg-emerald-500/15 text-emerald-400 border-emerald-500/20" },
 };
 
-export default function AlumniAnnouncementsPage() {
+export default function EmployerAnnouncementsPage() {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [loading, setLoading] = useState(true);
   const [category, setCategory] = useState("");

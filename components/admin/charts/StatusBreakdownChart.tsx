@@ -3,6 +3,7 @@
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Cell, ResponsiveContainer,
 } from "recharts";
+import { ClientOnly } from "@/components/shared/ClientOnly";
 
 interface StatusBreakdownChartProps {
   data: Array<{ status: string; label: string; count: number }>;
@@ -39,27 +40,29 @@ export function StatusBreakdownChart({ data }: StatusBreakdownChartProps) {
   }
 
   return (
-    <ResponsiveContainer width="100%" height={280}>
-      <BarChart
-        data={filtered}
-        layout="vertical"
-        margin={{ top: 8, right: 24, left: 80, bottom: 8 }}
-      >
-        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" horizontal={false} />
-        <XAxis type="number" tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }} allowDecimals={false} />
-        <YAxis
-          type="category"
-          dataKey="label"
-          tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }}
-          width={80}
-        />
-        <Tooltip content={<CustomTooltip />} />
-        <Bar dataKey="count" radius={[0, 4, 4, 0]}>
-          {filtered.map((entry) => (
-            <Cell key={entry.status} fill={STATUS_COLORS[entry.status] ?? "#94a3b8"} />
-          ))}
-        </Bar>
-      </BarChart>
-    </ResponsiveContainer>
+    <ClientOnly fallback={<div className="h-[280px] w-full bg-muted/20 animate-pulse rounded-xl" />}>
+      <ResponsiveContainer width="100%" height={280}>
+        <BarChart
+          data={filtered}
+          layout="vertical"
+          margin={{ top: 8, right: 24, left: 80, bottom: 8 }}
+        >
+          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" horizontal={false} />
+          <XAxis type="number" tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }} allowDecimals={false} />
+          <YAxis
+            type="category"
+            dataKey="label"
+            tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }}
+            width={80}
+          />
+          <Tooltip content={<CustomTooltip />} />
+          <Bar dataKey="count" radius={[0, 4, 4, 0]}>
+            {filtered.map((entry) => (
+              <Cell key={entry.status} fill={STATUS_COLORS[entry.status] ?? "#94a3b8"} />
+            ))}
+          </Bar>
+        </BarChart>
+      </ResponsiveContainer>
+    </ClientOnly>
   );
 }

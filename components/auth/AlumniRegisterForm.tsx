@@ -129,7 +129,7 @@ export function AlumniRegisterForm() {
           <FormField control={form.control} name="course" render={({ field }) => (
             <FormItem>
               <FormLabel className={labelCls}>Course *</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
+              <Select onValueChange={field.onChange} value={field.value ?? ""}>
                 <FormControl>
                   <SelectTrigger id="alumni-course" className={`${inputCls} w-full`}>
                     <SelectValue placeholder="Select course" />
@@ -145,31 +145,18 @@ export function AlumniRegisterForm() {
           <FormField control={form.control} name="batch_year" render={({ field }) => (
             <FormItem>
               <FormLabel className={labelCls}>Batch Year *</FormLabel>
-              <Select onValueChange={(v) => field.onChange(Number(v))} value={field.value?.toString()}>
-                <FormControl>
-                  <SelectTrigger id="alumni-batch-year" className={`${inputCls} w-full`}>
-                    <SelectValue placeholder="Select year" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>{BATCH_YEARS.map((y) => <SelectItem key={y} value={y.toString()}>{y}</SelectItem>)}</SelectContent>
-              </Select>
+              <FormControl><Input {...field} value={field.value ?? ""} type="number" id="alumni-batch-year" placeholder="e.g. 2020" className={inputCls} /></FormControl>
               <FormMessage className="text-red-300 text-xs" />
             </FormItem>
           )} />
           <FormField control={form.control} name="graduation_year" render={({ field }) => (
             <FormItem>
               <FormLabel className={labelCls}>Graduation Year *</FormLabel>
-              <Select onValueChange={(v) => field.onChange(Number(v))} value={field.value?.toString()}>
-                <FormControl>
-                  <SelectTrigger id="alumni-grad-year" className={`${inputCls} w-full`}>
-                    <SelectValue placeholder="Select year" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>{GRADUATION_YEARS.map((y) => <SelectItem key={y} value={y.toString()}>{y}</SelectItem>)}</SelectContent>
-              </Select>
+              <FormControl><Input {...field} value={field.value ?? ""} type="number" id="alumni-grad-year" placeholder="e.g. 2024" className={inputCls} /></FormControl>
               <FormMessage className="text-red-300 text-xs" />
             </FormItem>
           )} />
+
         </div>
 
         <Button id="alumni-register-submit" type="submit" disabled={form.formState.isSubmitting} className="w-full h-11 bg-gradient-to-r from-pclu-sky-600 to-pclu-sky-500 hover:from-pclu-sky-500 hover:to-pclu-sky-400 text-white font-semibold shadow-lg">

@@ -25,13 +25,13 @@ export const alumniRegisterSchema = z
     course: z.enum([...PCLU_COURSES] as [string, ...string[]], {
       message: "Please select a valid course",
     }),
-    batch_year: z
-      .number({ message: "Please select a batch year" })
+    batch_year: z.coerce
+      .number({ message: "Please enter a batch year" })
       .int()
       .min(2000, "Batch year must be 2000 or later")
       .max(currentYear, "Batch year cannot be in the future"),
-    graduation_year: z
-      .number({ message: "Please select a graduation year" })
+    graduation_year: z.coerce
+      .number({ message: "Please enter a graduation year" })
       .int()
       .min(2004, "Graduation year must be 2004 or later")
       .max(currentYear + 5, "Graduation year is too far in the future"),

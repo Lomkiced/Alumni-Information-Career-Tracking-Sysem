@@ -3,6 +3,7 @@
 import {
   PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer,
 } from "recharts";
+import { ClientOnly } from "@/components/shared/ClientOnly";
 
 interface IndustryPieChartProps {
   data: Array<{ industry: string; count: number; percentage: number }>;
@@ -47,29 +48,31 @@ export function IndustryPieChart({ data }: IndustryPieChartProps) {
   }
 
   return (
-    <ResponsiveContainer width="100%" height={280}>
-      <PieChart>
-        <Pie
-          data={data}
-          dataKey="count"
-          nameKey="industry"
-          cx="50%"
-          cy="50%"
-          outerRadius={100}
-          labelLine={false}
-          label={renderLabel}
-        >
-          {data.map((_, index) => (
-            <Cell key={index} fill={COLORS[index % COLORS.length]} />
-          ))}
-        </Pie>
-        <Tooltip content={<CustomTooltip />} />
-        <Legend
-          formatter={(v) => <span className="text-xs text-muted-foreground">{v}</span>}
-          iconType="circle"
-          iconSize={8}
-        />
-      </PieChart>
-    </ResponsiveContainer>
+    <ClientOnly fallback={<div className="h-[280px] w-full bg-muted/20 animate-pulse rounded-xl" />}>
+      <ResponsiveContainer width="100%" height={280}>
+        <PieChart>
+          <Pie
+            data={data}
+            dataKey="count"
+            nameKey="industry"
+            cx="50%"
+            cy="50%"
+            outerRadius={100}
+            labelLine={false}
+            label={renderLabel}
+          >
+            {data.map((_, index) => (
+              <Cell key={index} fill={COLORS[index % COLORS.length]} />
+            ))}
+          </Pie>
+          <Tooltip content={<CustomTooltip />} />
+          <Legend
+            formatter={(v) => <span className="text-xs text-muted-foreground">{v}</span>}
+            iconType="circle"
+            iconSize={8}
+          />
+        </PieChart>
+      </ResponsiveContainer>
+    </ClientOnly>
   );
 }
