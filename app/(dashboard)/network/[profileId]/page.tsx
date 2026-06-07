@@ -7,6 +7,7 @@ import { MessageSquare, MapPin, Briefcase, GraduationCap, Building, Calendar } f
 import { formatInitials } from "@/lib/utils/format";
 import { format, differenceInYears } from "date-fns";
 import Link from "next/link";
+import { BackButton } from "@/components/shared/BackButton";
 
 interface NetworkProfilePageProps {
   params: Promise<{ profileId: string }>;
@@ -115,6 +116,7 @@ export default async function NetworkProfilePage({ params }: NetworkProfilePageP
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
+      <BackButton />
       {/* ── Header Card ─────────────────────────────────────────────────── */}
       <Card className="overflow-hidden border-border/50 shadow-sm">
         <div className="h-32 bg-gradient-to-r from-primary/20 via-primary/10 to-transparent" />

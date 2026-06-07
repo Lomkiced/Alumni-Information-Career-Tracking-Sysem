@@ -1,7 +1,7 @@
 "use client";
 // app/(dashboard)/admin/announcements/page.tsx
 import { useState, useEffect, useCallback } from "react";
-import { Megaphone, Plus, Trash2, Eye, EyeOff, MessageSquare } from "lucide-react";
+import { Megaphone, Plus, Trash2, Eye, EyeOff, MessageSquare, Pin, PinOff } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import Link from "next/link";
@@ -16,6 +16,7 @@ interface Announcement {
   title: string;
   category: string;
   is_published: boolean;
+  is_pinned: boolean;
   published_at?: string;
   expires_at?: string;
   created_at: string;
@@ -66,6 +67,21 @@ export default function AdminAnnouncementsPage() {
     await fetchAnnouncements();
   };
 
+  const handlePinToggle = async (id: string, currentlyPinned: boolean) => {
+    const res = await fetch(`/api/admin/announcements/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ is_pinned: !currentlyPinned }),
+    });
+    if (!res.ok) { 
+      const data = await res.json().catch(() => ({}));
+      toast.error(data.error || "Failed to update pin status"); 
+      return; 
+    }
+    toast.success(!currentlyPinned ? "Announcement pinned!" : "Announcement unpinned");
+    await fetchAnnouncements();
+  };
+
   return (
     <div className="space-y-6">
       <PageHeader icon={Megaphone} title="Announcements" description="Manage and publish announcements for alumni">
@@ -92,10 +108,15 @@ export default function AdminAnnouncementsPage() {
           {announcements.map(ann => {
             const isExpanded = expandedId === ann.id;
             return (
-              <div key={ann.id} className="rounded-xl border border-border bg-card overflow-hidden hover:shadow-sm transition-shadow">
+              <div key={ann.id} className={`rounded-xl border ${ann.is_pinned ? "border-amber-500/50 bg-amber-50/10 dark:bg-amber-950/20" : "border-border bg-card"} overflow-hidden hover:shadow-sm transition-shadow`}>
                 <div className="p-4 flex items-start gap-4">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
+                      {ann.is_pinned && (
+                        <span className="text-xs text-amber-500 font-medium flex items-center gap-1">
+                          <Pin size={10} className="fill-amber-500" /> Pinned
+                        </span>
+                      )}
                       <span className={`text-xs font-medium px-2 py-0.5 rounded-full capitalize ${CATEGORY_COLORS[ann.category] ?? CATEGORY_COLORS.general}`}>
                         {ann.category.replace("_", " ")}
                       </span>
@@ -119,6 +140,15 @@ export default function AdminAnnouncementsPage() {
                       onClick={() => setExpandedId(isExpanded ? null : ann.id)}
                     >
                       <MessageSquare size={13} /> Discussions
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className={`h-8 gap-1.5 ${ann.is_pinned ? "text-amber-500 hover:bg-amber-500/10" : "text-muted-foreground"}`}
+                      onClick={() => handlePinToggle(ann.id, ann.is_pinned)}
+                    >
+                      {ann.is_pinned ? <PinOff size={13} /> : <Pin size={13} />}
+                      {ann.is_pinned ? "Unpin" : "Pin"}
                     </Button>
                     <Button
                       variant="ghost"

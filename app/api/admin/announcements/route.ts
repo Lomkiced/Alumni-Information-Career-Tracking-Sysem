@@ -11,6 +11,7 @@ const announcementSchema = z.object({
   category: z.enum(["general", "event", "job_fair", "seminar", "alumni_news"]).default("general"),
   image_url: z.string().optional(),
   is_published: z.boolean().default(false),
+  is_pinned: z.boolean().default(false),
   expires_at: z.string().optional(),
 });
 
@@ -30,7 +31,8 @@ export async function GET() {
 
     const { data, error } = await db
       .from("announcements")
-      .select("id, title, category, is_published, published_at, expires_at, created_at, profiles(full_name)")
+      .select("id, title, category, is_published, is_pinned, published_at, expires_at, created_at, profiles(full_name)")
+      .order("is_pinned", { ascending: false })
       .order("created_at", { ascending: false });
 
     if (error) throw error;
@@ -69,6 +71,7 @@ export async function POST(request: NextRequest) {
         category: d.category,
         image_url: d.image_url || null,
         is_published: d.is_published,
+        is_pinned: d.is_pinned,
         published_at: d.is_published ? new Date().toISOString() : null,
         expires_at: d.expires_at || null,
       })

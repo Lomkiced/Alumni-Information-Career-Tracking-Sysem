@@ -195,6 +195,7 @@ model Announcement {
   category     String    @default("general") // 'general' | 'event' | 'job_fair' | 'seminar' | 'alumni_news'
   image_url    String?
   is_published Boolean   @default(false)
+  is_pinned    Boolean   @default(false)
   published_at DateTime? @db.Timestamptz(6)
   expires_at   DateTime? @db.Timestamptz(6)
   created_at   DateTime  @default(now()) @db.Timestamptz(6)
