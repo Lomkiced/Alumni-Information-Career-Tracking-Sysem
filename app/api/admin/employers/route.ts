@@ -18,7 +18,7 @@ export async function GET() {
       .select(`
         id, company_name, industry, company_size, approval_status,
         rejection_reason, approved_at, created_at,
-        profiles!inner(full_name, email)
+        profiles!employers_id_fkey!inner(full_name, email)
       `)
       .order("created_at", { ascending: false });
 
