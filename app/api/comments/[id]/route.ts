@@ -18,7 +18,7 @@ export async function DELETE(
       .from("comments")
       .select("user_id")
       .eq("id", id)
-      .single();
+      .single<{ user_id: string }>();
 
     if (fetchError || !comment) {
       return NextResponse.json({ error: "Comment not found" }, { status: 404 });
@@ -29,7 +29,7 @@ export async function DELETE(
       .from("profiles")
       .select("role")
       .eq("id", user.id)
-      .single();
+      .single<{ role: string }>();
 
     const isAdmin = profile?.role === "admin";
     const isOwner = comment.user_id === user.id;

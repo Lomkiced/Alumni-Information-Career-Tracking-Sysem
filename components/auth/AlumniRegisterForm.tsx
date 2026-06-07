@@ -22,7 +22,7 @@ export function AlumniRegisterForm() {
 
   const form = useForm<AlumniRegisterInput>({
     resolver: zodResolver(alumniRegisterSchema),
-    defaultValues: { full_name: "", email: "", password: "", confirm_password: "", student_id: "", course: undefined, batch_year: undefined, graduation_year: undefined },
+    defaultValues: { full_name: "", email: "", password: "", confirm_password: "", student_id: "", course: undefined, batch_year: "", graduation_year: "" } as any,
   });
 
   const onSubmit = async (data: AlumniRegisterInput) => {
@@ -57,33 +57,27 @@ export function AlumniRegisterForm() {
 
   const inputCls = "bg-white/10 border-white/20 text-white placeholder:text-slate-400 focus:border-pclu-sky-400 h-10";
   const labelCls = "text-slate-200 text-sm font-medium";
+  const control = form.control as any;
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
-        {error && <div className="rounded-lg bg-red-500/10 border border-red-500/30 px-4 py-3 text-red-300 text-sm">{error}</div>}
-
-        {/* Section 1: Account */}
-        <div className="space-y-1 pb-1">
-          <p className="text-pclu-sky-400 text-xs font-semibold uppercase tracking-wider">Account Information</p>
           <div className="h-px bg-white/10" />
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <FormField control={form.control} name="full_name" render={({ field }) => (
+          <FormField control={control} name="full_name" render={({ field }) => (
             <FormItem className="sm:col-span-2">
               <FormLabel className={labelCls}>Full Name *</FormLabel>
               <FormControl><Input {...field} id="alumni-full-name" placeholder="Juan dela Cruz" className={inputCls} /></FormControl>
               <FormMessage className="text-red-300 text-xs" />
             </FormItem>
           )} />
-          <FormField control={form.control} name="email" render={({ field }) => (
+          <FormField control={control} name="email" render={({ field }) => (
             <FormItem className="sm:col-span-2">
               <FormLabel className={labelCls}>Email Address *</FormLabel>
               <FormControl><Input {...field} id="alumni-email" type="email" placeholder="juan@email.com" className={inputCls} /></FormControl>
               <FormMessage className="text-red-300 text-xs" />
             </FormItem>
           )} />
-          <FormField control={form.control} name="password" render={({ field }) => (
+          <FormField control={control} name="password" render={({ field }) => (
             <FormItem>
               <FormLabel className={labelCls}>Password *</FormLabel>
               <FormControl>
@@ -97,7 +91,7 @@ export function AlumniRegisterForm() {
               <FormMessage className="text-red-300 text-xs" />
             </FormItem>
           )} />
-          <FormField control={form.control} name="confirm_password" render={({ field }) => (
+          <FormField control={control} name="confirm_password" render={({ field }) => (
             <FormItem>
               <FormLabel className={labelCls}>Confirm Password *</FormLabel>
               <FormControl>
@@ -119,14 +113,14 @@ export function AlumniRegisterForm() {
           <div className="h-px bg-white/10" />
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <FormField control={form.control} name="student_id" render={({ field }) => (
+          <FormField control={control} name="student_id" render={({ field }) => (
             <FormItem>
               <FormLabel className={labelCls}>Student ID <span className="text-slate-500">(optional)</span></FormLabel>
               <FormControl><Input {...field} id="alumni-student-id" placeholder="e.g. 2019-12345" className={inputCls} /></FormControl>
               <FormMessage className="text-red-300 text-xs" />
             </FormItem>
           )} />
-          <FormField control={form.control} name="course" render={({ field }) => (
+          <FormField control={control} name="course" render={({ field }) => (
             <FormItem>
               <FormLabel className={labelCls}>Course *</FormLabel>
               <Select onValueChange={field.onChange} value={field.value ?? ""}>
@@ -142,14 +136,14 @@ export function AlumniRegisterForm() {
               <FormMessage className="text-red-300 text-xs" />
             </FormItem>
           )} />
-          <FormField control={form.control} name="batch_year" render={({ field }) => (
+          <FormField control={control} name="batch_year" render={({ field }) => (
             <FormItem>
               <FormLabel className={labelCls}>Batch Year *</FormLabel>
               <FormControl><Input {...field} value={field.value ?? ""} type="number" id="alumni-batch-year" placeholder="e.g. 2020" className={inputCls} /></FormControl>
               <FormMessage className="text-red-300 text-xs" />
             </FormItem>
           )} />
-          <FormField control={form.control} name="graduation_year" render={({ field }) => (
+          <FormField control={control} name="graduation_year" render={({ field }) => (
             <FormItem>
               <FormLabel className={labelCls}>Graduation Year *</FormLabel>
               <FormControl><Input {...field} value={field.value ?? ""} type="number" id="alumni-grad-year" placeholder="e.g. 2024" className={inputCls} /></FormControl>
