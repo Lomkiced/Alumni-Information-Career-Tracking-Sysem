@@ -15,13 +15,13 @@ export async function GET() {
       .from("profiles")
       .select("full_name, phone")
       .eq("id", user.id)
-      .single();
+      .single<{ full_name: string; phone: string | null }>();
 
     const { data: employer, error: employerErr } = await supabase
       .from("employers")
       .select("*")
       .eq("id", user.id)
-      .single();
+      .single<any>();
 
     if (employerErr || !employer) {
       return NextResponse.json({ error: "Employer profile not found" }, { status: 404 });
@@ -73,7 +73,7 @@ export async function PUT(req: Request) {
     const data = validationResult.data;
 
     // Update Profile
-    const { error: profileErr } = await supabase
+    const { error: profileErr } = await (supabase as any)
       .from("profiles")
       .update({
         full_name: data.full_name,
@@ -84,7 +84,7 @@ export async function PUT(req: Request) {
     if (profileErr) throw profileErr;
 
     // Update Employer
-    const { error: employerErr } = await supabase
+    const { error: employerErr } = await (supabase as any)
       .from("employers")
       .update({
         company_name: data.company_name,

@@ -21,7 +21,7 @@ export function AlumniRegisterForm() {
   const [error, setError] = useState<string | null>(null);
 
   const form = useForm<AlumniRegisterInput>({
-    resolver: zodResolver(alumniRegisterSchema),
+    resolver: zodResolver(alumniRegisterSchema) as any,
     defaultValues: { full_name: "", email: "", password: "", confirm_password: "", student_id: "", course: undefined, batch_year: "", graduation_year: "" } as any,
   });
 
@@ -60,6 +60,13 @@ export function AlumniRegisterForm() {
   const control = form.control as any;
 
   return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+        {error && <div className="rounded-lg bg-red-500/10 border border-red-500/30 px-4 py-3 text-red-300 text-sm">{error}</div>}
+
+        {/* Section 1: Account */}
+        <div className="space-y-1 pb-1">
+          <p className="text-pclu-sky-400 text-xs font-semibold uppercase tracking-wider">Account Information</p>
           <div className="h-px bg-white/10" />
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
