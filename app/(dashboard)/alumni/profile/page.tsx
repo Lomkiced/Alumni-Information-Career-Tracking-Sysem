@@ -23,6 +23,7 @@ interface ProfileData {
   batch_year?: number; graduation_year?: number;
   address?: string; city?: string; province?: string;
   linkedin_url?: string; is_profile_public: boolean;
+  resume_url?: string;
 }
 
 export default function AlumniProfilePage() {
@@ -31,6 +32,8 @@ export default function AlumniProfilePage() {
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const [uploadingResume, setUploadingResume] = useState(false);
+  const resumeRef = useRef<HTMLInputElement>(null);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const form = useForm<AlumniProfileInput, any, AlumniProfileInput>({
@@ -55,6 +58,7 @@ export default function AlumniProfilePage() {
             major: data.major ?? "",
             is_profile_public: data.is_profile_public ?? true,
             course: data.course ?? undefined,
+            resume_url: data.resume_url ?? undefined,
           });
         }
       })
@@ -83,6 +87,64 @@ export default function AlumniProfilePage() {
       toast.error("Upload failed. Please try again.");
     } finally {
       setUploading(false);
+    }
+  };
+
+  const handleResumeUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { toast.error("File must be under 5MB"); return; }
+    if (![".pdf", ".doc", ".docx"].some(ext => file.name.toLowerCase().endsWith(ext))) { toast.error("Only PDF, DOC, DOCX allowed"); return; }
+
+    setUploadingResume(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      const ext = file.name.split(".").pop();
+      const path = `applications/default_${user!.id}_${Date.now()}.${ext}`;
+      const { error: uploadErr } = await supabase.storage.from("resumes").upload(path, file);
+      if (uploadErr) throw uploadErr;
+
+      const { data: { publicUrl } } = supabase.storage.from("resumes").getPublicUrl(path);
+      
+      const currentProfileData = form.getValues();
+      const res = await fetch("/api/alumni/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...currentProfileData, resume_url: publicUrl }),
+      });
+      
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => null);
+        console.error("API Error Response:", errorData);
+        throw new Error(errorData?.error || "Failed to save resume URL");
+      }
+
+      setProfile(prev => prev ? { ...prev, resume_url: publicUrl } : prev);
+      toast.success("Resume updated!");
+    } catch (error) {
+      console.error(error);
+      toast.error("Upload failed. Please try again.");
+    } finally {
+      setUploadingResume(false);
+      if (resumeRef.current) resumeRef.current.value = "";
+    }
+  };
+
+  const handleDeleteResume = async () => {
+    try {
+      const currentProfileData = form.getValues();
+      const res = await fetch("/api/alumni/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...currentProfileData, resume_url: "" }),
+      });
+      if (!res.ok) throw new Error("Failed to remove resume");
+      
+      setProfile(prev => prev ? { ...prev, resume_url: undefined } : prev);
+      toast.success("Resume removed");
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to remove resume");
     }
   };
 
@@ -155,6 +217,51 @@ export default function AlumniProfilePage() {
             <p className="text-xs text-muted-foreground flex items-center gap-1.5"><GraduationCap size={12} />{profile?.course ?? "—"}</p>
             {profile?.batch_year && <p className="text-xs text-muted-foreground">Batch: {profile.batch_year}</p>}
             {profile?.graduation_year && <p className="text-xs text-muted-foreground">Graduated: {profile.graduation_year}</p>}
+          </div>
+
+          {/* Career Documents */}
+          <div className="w-full space-y-3 pt-4 border-t border-border">
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Career Documents</p>
+            </div>
+            
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-foreground">Saved Resume</p>
+              {!profile?.resume_url ? (
+                <label className="relative border-2 border-dashed border-border rounded-xl p-4 hover:bg-muted/50 hover:border-primary/50 transition-colors text-center cursor-pointer group block">
+                  <input
+                    ref={resumeRef}
+                    type="file"
+                    accept=".pdf,.doc,.docx"
+                    onChange={handleResumeUpload}
+                    className="hidden"
+                    disabled={uploadingResume}
+                  />
+                  <div className="flex flex-col items-center gap-1.5">
+                    <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center group-hover:scale-110 transition-transform">
+                      {uploadingResume ? <Loader2 size={14} className="animate-spin" /> : <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-file-text"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>}
+                    </div>
+                    <p className="text-xs font-medium text-foreground mt-0.5">{uploadingResume ? "Uploading..." : "Upload Resume"}</p>
+                    <p className="text-[10px] text-muted-foreground">PDF, DOC, DOCX</p>
+                  </div>
+                </label>
+              ) : (
+                <div className="flex items-center justify-between bg-muted/30 p-3 rounded-lg border border-border">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-file-text"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-xs font-medium text-foreground truncate">Saved_Resume</p>
+                      <a href={profile.resume_url} target="_blank" rel="noopener noreferrer" className="text-[10px] text-primary hover:underline">View Document</a>
+                    </div>
+                  </div>
+                  <button onClick={handleDeleteResume} className="text-muted-foreground hover:text-destructive p-1.5 shrink-0 transition-colors bg-muted hover:bg-destructive/10 rounded-md">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-trash-2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 

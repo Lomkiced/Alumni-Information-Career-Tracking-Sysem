@@ -21,9 +21,9 @@ export async function GET() {
 
     const { data: alumni, error: alumniErr } = await supabase
       .from("alumni")
-      .select("student_id, course, major, batch_year, graduation_year, address, city, province, linkedin_url, is_profile_public")
+      .select("student_id, course, major, batch_year, graduation_year, address, city, province, linkedin_url, resume_url, is_profile_public")
       .eq("id", user.id)
-      .single<{ student_id: string | null; course: string; major: string | null; batch_year: number; graduation_year: number; address: string | null; city: string | null; province: string | null; linkedin_url: string | null; is_profile_public: boolean }>();
+      .single<{ student_id: string | null; course: string; major: string | null; batch_year: number; graduation_year: number; address: string | null; city: string | null; province: string | null; linkedin_url: string | null; resume_url: string | null; is_profile_public: boolean }>();
     if (alumniErr && alumniErr.code !== "PGRST116") throw alumniErr;
 
     return Response.json({ data: { ...profile, ...alumni } });
@@ -44,17 +44,19 @@ export async function PATCH(request: NextRequest) {
     const parsed = alumniProfileSchema.safeParse(body);
     if (!parsed.success) return Response.json({ error: parsed.error.flatten().fieldErrors }, { status: 422 });
 
-    const { full_name, phone, address, city, province, linkedin_url, major, is_profile_public, course } = parsed.data;
+    const { full_name, phone, address, city, province, linkedin_url, resume_url, major, is_profile_public, course } = parsed.data;
 
     // Get old values for audit
     const { data: oldProfile } = await supabase.from("profiles").select("full_name, phone").eq("id", user.id).single();
 
     // Update profiles table
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { error: profileErr } = await (supabase.from("profiles") as any)
       .update({ full_name, phone: phone || null, updated_at: new Date().toISOString() })
       .eq("id", user.id);
-    if (profileErr) throw profileErr;
+    if (profileErr) {
+      console.error("Profile Update Error:", profileErr);
+      throw profileErr;
+    }
 
     // Update alumni table
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -64,13 +66,17 @@ export async function PATCH(request: NextRequest) {
         city: city || null,
         province: province || null,
         linkedin_url: linkedin_url || null,
+        resume_url: resume_url || null,
         major: major || null,
         is_profile_public,
         course: course || undefined,
         updated_at: new Date().toISOString(),
       })
       .eq("id", user.id);
-    if (alumniErr) throw alumniErr;
+    if (alumniErr) {
+      console.error("Alumni Update Error:", alumniErr);
+      throw alumniErr;
+    }
 
     await logAudit({
       userId: user.id,
@@ -84,8 +90,8 @@ export async function PATCH(request: NextRequest) {
     });
 
     return Response.json({ data: { success: true } });
-  } catch (error) {
-    console.error("[PATCH /api/alumni/profile]", error);
-    return Response.json({ error: "Internal server error" }, { status: 500 });
+  } catch (error: any) {
+    console.error("[PATCH /api/alumni/profile] ERROR DETAILS:", error);
+    return Response.json({ error: error.message || "Internal server error" }, { status: 500 });
   }
 }

@@ -26,6 +26,9 @@ model Profile {
   created_at        DateTime @default(now()) @db.Timestamptz(6)
   updated_at        DateTime @updatedAt @db.Timestamptz(6)
 
+  birthdate     DateTime? @db.Date
+  is_searchable Boolean   @default(true)
+
   // Relations
   alumni             Alumni?
   employer           Employer?
@@ -33,6 +36,10 @@ model Profile {
   audit_logs         AuditLog[]
   announcements      Announcement[]
   approved_employers Employer[]     @relation("ApprovedByAdmin")
+
+  conversations_as_user1 Conversation[] @relation("ConversationUser1")
+  conversations_as_user2 Conversation[] @relation("ConversationUser2")
+  messages_sent          Message[]      @relation("MessageSender")
 
   @@map("profiles")
 }
@@ -51,6 +58,7 @@ model Alumni {
   city              String?
   province          String?
   linkedin_url      String?
+  resume_url        String?
   is_profile_public Boolean  @default(true)
   created_at        DateTime @default(now()) @db.Timestamptz(6)
   updated_at        DateTime @updatedAt @db.Timestamptz(6)
@@ -239,4 +247,43 @@ model Notification {
   @@index([user_id])
   @@index([is_read])
   @@map("notifications")
+}
+
+// ============================================================
+// MESSAGING & NETWORKING
+// ============================================================
+model Conversation {
+  id         String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user1_id   String   @db.Uuid
+  user2_id   String   @db.Uuid
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  updated_at DateTime @updatedAt @db.Timestamptz(6)
+
+  // Relations
+  user1    Profile   @relation("ConversationUser1", fields: [user1_id], references: [id], onDelete: Cascade)
+  user2    Profile   @relation("ConversationUser2", fields: [user2_id], references: [id], onDelete: Cascade)
+  messages Message[]
+
+  @@unique([user1_id, user2_id])
+  @@index([user1_id])
+  @@index([user2_id])
+  @@map("conversations")
+}
+
+model Message {
+  id              String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  conversation_id String   @db.Uuid
+  sender_id       String   @db.Uuid
+  content         String
+  is_read         Boolean  @default(false)
+  created_at      DateTime @default(now()) @db.Timestamptz(6)
+
+  // Relations
+  conversation Conversation @relation(fields: [conversation_id], references: [id], onDelete: Cascade)
+  sender       Profile      @relation("MessageSender", fields: [sender_id], references: [id], onDelete: Cascade)
+
+  @@index([conversation_id])
+  @@index([sender_id])
+  @@index([created_at])
+  @@map("messages")
 }

@@ -1,7 +1,7 @@
 "use client";
 // app/(dashboard)/alumni/jobs/page.tsx
 import { useState, useEffect, useCallback } from "react";
-import { Briefcase, Search, MapPin, Clock, DollarSign, X, Loader2, Send } from "lucide-react";
+import { Briefcase, Search, MapPin, Clock, DollarSign, X, Loader2, Send, Paperclip } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { PageHeader } from "@/components/shared/PageHeader";
@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { INDUSTRIES } from "@/lib/constants/courses";
+import { createClient } from "@/lib/supabase/client";
 
 interface JobPosting {
   id: string;
@@ -44,7 +45,14 @@ export default function AlumniJobsPage() {
   const [total, setTotal] = useState(0);
   const [applyJob, setApplyJob] = useState<JobPosting | null>(null);
   const [coverLetter, setCoverLetter] = useState("");
+  const [coverLetterMode, setCoverLetterMode] = useState<"text" | "upload">("text");
+  const [coverLetterFile, setCoverLetterFile] = useState<File | null>(null);
+  const [resumeFile, setResumeFile] = useState<File | null>(null);
+  const [savedResumeUrl, setSavedResumeUrl] = useState<string | null>(null);
+  const [useSavedResume, setUseSavedResume] = useState(false);
   const [applying, setApplying] = useState(false);
+
+  const supabase = createClient();
 
   const fetchJobs = useCallback(async () => {
     setLoading(true);
@@ -61,13 +69,100 @@ export default function AlumniJobsPage() {
 
   useEffect(() => { fetchJobs(); }, [fetchJobs]);
 
+  useEffect(() => {
+    fetch("/api/alumni/profile")
+      .then(res => res.json())
+      .then(json => {
+        if (json.data?.resume_url) {
+          setSavedResumeUrl(json.data.resume_url);
+          setUseSavedResume(true);
+        }
+      })
+      .catch(console.error);
+  }, []);
+
   const handleApply = async () => {
     if (!applyJob) return;
+
+    if (!useSavedResume && !resumeFile) {
+      toast.error("Please upload your resume.");
+      return;
+    }
+
+    if (coverLetterMode === "text" && !coverLetter.trim()) {
+      toast.error("Please provide a cover letter.");
+      return;
+    }
+
+    if (coverLetterMode === "upload" && !coverLetterFile) {
+      toast.error("Please upload your cover letter.");
+      return;
+    }
+
     setApplying(true);
+
+    let resume_url = useSavedResume && savedResumeUrl ? savedResumeUrl : "";
+    if (!useSavedResume && resumeFile) {
+      if (resumeFile.size > 5 * 1024 * 1024) {
+        toast.error("Resume file must be under 5MB");
+        setApplying(false);
+        return;
+      }
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error("Not authenticated");
+
+        const ext = resumeFile.name.split(".").pop();
+        const path = `applications/${user.id}_${applyJob.id}_${Date.now()}.${ext}`;
+        const { error: uploadErr } = await supabase.storage.from("resumes").upload(path, resumeFile);
+        
+        if (uploadErr) throw uploadErr;
+
+        const { data: { publicUrl } } = supabase.storage.from("resumes").getPublicUrl(path);
+        resume_url = publicUrl;
+      } catch (err) {
+        console.error(err);
+        toast.error("Failed to upload resume. Please try again.");
+        setApplying(false);
+        return;
+      }
+    }
+
+    let finalCoverLetter = coverLetter;
+    if (coverLetterMode === "upload" && coverLetterFile) {
+      if (coverLetterFile.size > 5 * 1024 * 1024) {
+        toast.error("Cover letter file must be under 5MB");
+        setApplying(false);
+        return;
+      }
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error("Not authenticated");
+
+        const ext = coverLetterFile.name.split(".").pop();
+        const path = `applications/cover_${user.id}_${applyJob.id}_${Date.now()}.${ext}`;
+        const { error: uploadErr } = await supabase.storage.from("resumes").upload(path, coverLetterFile);
+        
+        if (uploadErr) throw uploadErr;
+
+        const { data: { publicUrl } } = supabase.storage.from("resumes").getPublicUrl(path);
+        finalCoverLetter = publicUrl;
+      } catch (err) {
+        console.error(err);
+        toast.error("Failed to upload cover letter. Please try again.");
+        setApplying(false);
+        return;
+      }
+    }
+
     const res = await fetch("/api/alumni/jobs", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ job_id: applyJob.id, cover_letter: coverLetter }),
+      body: JSON.stringify({ 
+        job_id: applyJob.id, 
+        cover_letter: finalCoverLetter,
+        ...(resume_url && { resume_url })
+      }),
     });
     const json = await res.json();
     setApplying(false);
@@ -75,6 +170,9 @@ export default function AlumniJobsPage() {
     toast.success("Application submitted successfully!");
     setApplyJob(null);
     setCoverLetter("");
+    setCoverLetterFile(null);
+    setCoverLetterMode("text");
+    setResumeFile(null);
   };
 
   const formatSalary = (min?: number, max?: number) => {
@@ -176,38 +274,177 @@ export default function AlumniJobsPage() {
       {/* Apply Modal */}
       {applyJob && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setApplyJob(null)} />
-          <div className="relative z-10 w-full max-w-lg rounded-2xl border border-border bg-card p-6 shadow-2xl">
-            <div className="flex items-start justify-between mb-4">
-              <div>
-                <h3 className="font-heading font-semibold text-foreground">{applyJob.title}</h3>
-                <p className="text-sm text-primary">{applyJob.employers?.company_name}</p>
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setApplyJob(null)} />
+          <div className="relative z-10 w-full max-w-lg rounded-2xl border border-border/50 bg-card p-0 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            {/* Modal Header */}
+            <div className="px-6 py-5 border-b border-border/50 bg-muted/20 flex items-start justify-between">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                  <Briefcase size={20} />
+                </div>
+                <div>
+                  <h3 className="font-heading font-semibold text-lg text-foreground leading-tight">{applyJob.title}</h3>
+                  <p className="text-sm text-muted-foreground mt-0.5">{applyJob.employers?.company_name}</p>
+                </div>
               </div>
-              <button onClick={() => setApplyJob(null)} className="text-muted-foreground hover:text-foreground">
+              <button onClick={() => setApplyJob(null)} className="text-muted-foreground hover:text-foreground p-1.5 rounded-full hover:bg-muted transition-colors">
                 <X size={18} />
               </button>
             </div>
-            <div className="space-y-4">
+            
+            {/* Modal Body */}
+            <div className="p-6 space-y-6">
               <div>
-                <label className="text-sm font-medium text-foreground block mb-1.5">
-                  Cover Letter <span className="text-muted-foreground font-normal">(optional)</span>
-                </label>
-                <Textarea
-                  value={coverLetter}
-                  onChange={e => setCoverLetter(e.target.value)}
-                  rows={5}
-                  placeholder="Briefly introduce yourself and explain why you're a great fit for this role..."
-                  className="resize-none"
-                />
-                <p className="text-xs text-muted-foreground mt-1">{coverLetter.length}/2000</p>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-sm font-medium text-foreground">
+                    Resume
+                  </label>
+                  {savedResumeUrl && (
+                    <div className="flex bg-muted/50 rounded-lg p-0.5 border border-border/50">
+                      <button 
+                        onClick={() => setUseSavedResume(true)} 
+                        className={`text-xs px-3 py-1.5 rounded-md font-medium transition-colors ${useSavedResume ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+                      >
+                        Use Saved Resume
+                      </button>
+                      <button 
+                        onClick={() => setUseSavedResume(false)} 
+                        className={`text-xs px-3 py-1.5 rounded-md font-medium transition-colors ${!useSavedResume ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+                      >
+                        Upload Different
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {useSavedResume ? (
+                  <div className="flex items-center justify-between bg-muted/30 p-4 rounded-xl border border-border/50">
+                    <div className="flex items-center gap-3.5 min-w-0">
+                      <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                        <Paperclip size={18} />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-foreground truncate">Saved_Resume</p>
+                        <p className="text-xs text-primary mt-0.5">Attached from Profile</p>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    {!resumeFile ? (
+                      <label className="relative border-2 border-dashed border-border rounded-xl p-6 hover:bg-muted/50 hover:border-primary/50 transition-colors text-center cursor-pointer group block">
+                        <input
+                          type="file"
+                          accept=".pdf,.doc,.docx"
+                          onChange={e => setResumeFile(e.target.files?.[0] || null)}
+                          className="hidden"
+                        />
+                        <div className="flex flex-col items-center gap-2">
+                          <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <Paperclip size={18} />
+                          </div>
+                          <p className="text-sm font-medium text-foreground mt-1">Click to upload resume</p>
+                          <p className="text-xs text-muted-foreground">PDF, DOC, DOCX (Max 5MB)</p>
+                        </div>
+                      </label>
+                    ) : (
+                      <div className="flex items-center justify-between bg-card p-4 rounded-xl border border-primary/20 shadow-sm ring-1 ring-primary/10">
+                        <div className="flex items-center gap-3.5 min-w-0">
+                          <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                            <Paperclip size={18} />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium text-foreground truncate">{resumeFile.name}</p>
+                            <p className="text-xs text-muted-foreground mt-0.5">{(resumeFile.size / 1024 / 1024).toFixed(2)} MB</p>
+                          </div>
+                        </div>
+                        <button onClick={() => setResumeFile(null)} className="text-muted-foreground hover:text-destructive p-2 shrink-0 transition-colors bg-muted/50 hover:bg-destructive/10 rounded-full">
+                          <X size={16} />
+                        </button>
+                      </div>
+                    )}
+                  </>
+                )}
               </div>
-              <div className="flex gap-3 justify-end">
-                <Button variant="ghost" onClick={() => setApplyJob(null)}>Cancel</Button>
-                <Button className="bg-primary hover:bg-primary/90" onClick={handleApply} disabled={applying}>
-                  {applying && <Loader2 size={14} className="animate-spin mr-1.5" />}
-                  <Send size={14} className="mr-1.5" /> Submit Application
-                </Button>
+              
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-sm font-medium text-foreground">
+                    Cover Letter
+                  </label>
+                  <div className="flex bg-muted/50 rounded-lg p-0.5 border border-border/50">
+                    <button 
+                      onClick={() => setCoverLetterMode("text")} 
+                      className={`text-xs px-3 py-1.5 rounded-md font-medium transition-colors ${coverLetterMode === "text" ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+                    >
+                      Write Text
+                    </button>
+                    <button 
+                      onClick={() => setCoverLetterMode("upload")} 
+                      className={`text-xs px-3 py-1.5 rounded-md font-medium transition-colors ${coverLetterMode === "upload" ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+                    >
+                      Upload File
+                    </button>
+                  </div>
+                </div>
+
+                {coverLetterMode === "text" ? (
+                  <>
+                    <Textarea
+                      value={coverLetter}
+                      onChange={e => setCoverLetter(e.target.value)}
+                      rows={4}
+                      placeholder="Briefly introduce yourself and explain why you're a great fit for this role..."
+                      className="resize-none focus-visible:ring-primary/30"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1.5 text-right">{coverLetter.length}/2000</p>
+                  </>
+                ) : (
+                  <>
+                    {!coverLetterFile ? (
+                      <label className="relative border-2 border-dashed border-border rounded-xl p-6 hover:bg-muted/50 hover:border-primary/50 transition-colors text-center cursor-pointer group block">
+                        <input
+                          type="file"
+                          accept=".pdf,.doc,.docx"
+                          onChange={e => setCoverLetterFile(e.target.files?.[0] || null)}
+                          className="hidden"
+                        />
+                        <div className="flex flex-col items-center gap-2">
+                          <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <Paperclip size={18} />
+                          </div>
+                          <p className="text-sm font-medium text-foreground mt-1">Click to upload cover letter</p>
+                          <p className="text-xs text-muted-foreground">PDF, DOC, DOCX (Max 5MB)</p>
+                        </div>
+                      </label>
+                    ) : (
+                      <div className="flex items-center justify-between bg-card p-4 rounded-xl border border-primary/20 shadow-sm ring-1 ring-primary/10">
+                        <div className="flex items-center gap-3.5 min-w-0">
+                          <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                            <Paperclip size={18} />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium text-foreground truncate">{coverLetterFile.name}</p>
+                            <p className="text-xs text-muted-foreground mt-0.5">{(coverLetterFile.size / 1024 / 1024).toFixed(2)} MB</p>
+                          </div>
+                        </div>
+                        <button onClick={() => setCoverLetterFile(null)} className="text-muted-foreground hover:text-destructive p-2 shrink-0 transition-colors bg-muted/50 hover:bg-destructive/10 rounded-full">
+                          <X size={16} />
+                        </button>
+                      </div>
+                    )}
+                  </>
+                )}
               </div>
+            </div>
+            
+            {/* Modal Footer */}
+            <div className="px-6 py-4 bg-muted/20 border-t border-border/50 flex gap-3 justify-end">
+              <Button variant="outline" onClick={() => setApplyJob(null)} className="border-border/50">Cancel</Button>
+              <Button className="bg-primary hover:bg-primary/90 shadow-sm" onClick={handleApply} disabled={applying}>
+                {applying ? <Loader2 size={16} className="animate-spin mr-2" /> : <Send size={16} className="mr-2" />} 
+                Submit Application
+              </Button>
             </div>
           </div>
         </div>
