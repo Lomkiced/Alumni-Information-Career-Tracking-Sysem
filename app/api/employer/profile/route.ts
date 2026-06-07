@@ -27,19 +27,20 @@ export async function GET() {
       return NextResponse.json({ error: "Employer profile not found" }, { status: 404 });
     }
 
+    const emp = employer as any;
     const formattedData = {
-      full_name: profile?.full_name || "",
-      phone: profile?.phone || "",
-      company_name: employer.company_name,
-      industry: employer.industry,
-      company_size: employer.company_size || "",
-      business_permit_number: employer.business_permit_number || "",
-      company_address: employer.company_address || "",
-      company_website: employer.company_website || "",
-      company_description: employer.company_description || "",
-      company_logo_url: employer.company_logo_url || "",
-      approval_status: employer.approval_status,
-      rejection_reason: employer.rejection_reason,
+      full_name: (profile as any)?.full_name || "",
+      phone: (profile as any)?.phone || "",
+      company_name: emp.company_name,
+      industry: emp.industry,
+      company_size: emp.company_size || "",
+      business_permit_number: emp.business_permit_number || "",
+      company_address: emp.company_address || "",
+      company_website: emp.company_website || "",
+      company_description: emp.company_description || "",
+      company_logo_url: emp.company_logo_url || "",
+      approval_status: emp.approval_status,
+      rejection_reason: emp.rejection_reason,
     };
 
     return NextResponse.json(formattedData);
@@ -72,9 +73,7 @@ export async function PUT(req: Request) {
     
     const data = validationResult.data;
 
-    // Update Profile
-    const { error: profileErr } = await supabase
-      .from("profiles")
+    const { error: profileErr } = await (supabase.from("profiles") as any)
       .update({
         full_name: data.full_name,
         phone: data.phone || null,
@@ -83,9 +82,7 @@ export async function PUT(req: Request) {
 
     if (profileErr) throw profileErr;
 
-    // Update Employer
-    const { error: employerErr } = await supabase
-      .from("employers")
+    const { error: employerErr } = await (supabase.from("employers") as any)
       .update({
         company_name: data.company_name,
         industry: data.industry,

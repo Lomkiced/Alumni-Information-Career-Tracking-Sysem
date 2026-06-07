@@ -7,7 +7,9 @@ import { Loader2, MessageCircle } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { formatInitials } from "@/lib/utils/format";
 
-export default function MessagesPage() {
+import { Suspense } from "react";
+
+function MessagesContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [conversations, setConversations] = useState<any[]>([]);
@@ -30,7 +32,6 @@ export default function MessagesPage() {
   useEffect(() => {
     fetchConversations();
     
-    // Auto-refresh occasionally or we could use realtime, but polling is fine here
     const interval = setInterval(fetchConversations, 10000);
     return () => clearInterval(interval);
   }, []);
@@ -113,5 +114,17 @@ export default function MessagesPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function MessagesPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex justify-center py-20">
+        <Loader2 className="animate-spin text-primary opacity-50 w-8 h-8" />
+      </div>
+    }>
+      <MessagesContent />
+    </Suspense>
   );
 }

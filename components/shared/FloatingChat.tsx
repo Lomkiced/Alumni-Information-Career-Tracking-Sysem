@@ -63,7 +63,7 @@ export function FloatingChat() {
             // Fetch sender profile info to show toast
             const { data } = await supabase.from('profiles').select('full_name').eq('id', newMsg.sender_id).single();
             if (data) {
-              toast(`New message from ${data.full_name}`, {
+              toast(`New message from ${(data as any).full_name}`, {
                 action: {
                   label: "Reply",
                   onClick: () => {
@@ -270,9 +270,9 @@ export function FloatingChat() {
                             {msg.id.startsWith('temp-') ? (
                               <Check size={12} className="opacity-50" />
                             ) : msg.is_read ? (
-                              <CheckCheck size={14} className="text-blue-300" title="Seen" />
+                              <span title="Seen" className="flex"><CheckCheck size={14} className="text-blue-300" /></span>
                             ) : (
-                              <Check size={12} className="opacity-90" title="Delivered" />
+                              <span title="Delivered" className="flex"><Check size={12} className="opacity-90" /></span>
                             )}
                           </div>
                         )}

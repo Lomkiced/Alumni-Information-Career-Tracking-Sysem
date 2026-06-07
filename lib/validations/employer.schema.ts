@@ -18,6 +18,7 @@ export const employerProfileSchema = z.object({
       message: "Must be a valid URL",
     }),
   company_description: z.string().optional(),
+  company_logo_url: z.string().optional(),
 });
 
 export type EmployerProfileInput = z.infer<typeof employerProfileSchema>;
