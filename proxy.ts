@@ -45,6 +45,7 @@ export async function proxy(request: NextRequest) {
     "/register",
     "/forgot-password",
     "/api/auth/callback",
+    "/api/auth/register",
     "/api/cron/",
     "/api/search",
     "/api/messages",

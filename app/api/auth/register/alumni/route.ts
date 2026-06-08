@@ -2,7 +2,7 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
 import { alumniRegisterSchema } from "@/lib/validations/auth.schema";
-import { resend, FROM_EMAIL } from "@/lib/email/resend";
+import { transporter, FROM_EMAIL } from "@/lib/email/nodemailer";
 import { welcomeAlumniHtml } from "@/lib/email/templates/welcome-alumni";
 import { logAudit, AUDIT_ACTIONS } from "@/lib/utils/audit";
 
@@ -49,9 +49,28 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Failed to create alumni record" }, { status: 500 });
     }
 
-    // 4. Send welcome email (non-blocking)
-    resend.emails.send({ from: FROM_EMAIL, to: email, subject: "Welcome to AICTS — Verify Your Email", html: welcomeAlumniHtml({ full_name, email }) })
-      .catch((e) => console.error("[Resend]", e));
+    // 4. Generate verification link and send welcome email (non-blocking)
+    adminClient.auth.admin.generateLink({ type: "signup", email, password })
+      .then(async ({ data: linkData, error: linkErr }) => {
+        if (linkErr) {
+          console.error("[Auth] generateLink error:", linkErr);
+          return;
+        }
+        const action_link = linkData?.properties?.action_link;
+        if (!action_link) return;
+
+        try {
+          await transporter.sendMail({
+            from: FROM_EMAIL,
+            to: email,
+            subject: "Welcome to AICTS — Verify Your Email",
+            html: welcomeAlumniHtml({ full_name, email, action_link }),
+          });
+        } catch (e: any) {
+          console.error("[Nodemailer] Failed to send email. Check your SMTP_EMAIL and SMTP_PASSWORD. Error:", e.message);
+        }
+      })
+      .catch((e) => console.error("[Auth/Resend Pipeline]", e));
 
     // 5. Audit
     await logAudit({ userId, action: AUDIT_ACTIONS.CREATE_ALUMNI, tableName: "alumni", recordId: userId, newValues: { email, course, batch_year } });

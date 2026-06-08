@@ -75,21 +75,22 @@ model Alumni {
 // EMPLOYERS — extends profiles
 // ============================================================
 model Employer {
-  id                     String    @id @db.Uuid
-  company_name           String
-  industry               String
-  company_size           String? // '1-10' | '11-50' | '51-200' | '201-500' | '500+'
-  business_permit_number String?
-  company_address        String?
-  company_website        String?
-  company_logo_url       String?
-  company_description    String?
-  approval_status        String    @default("pending") // 'pending' | 'approved' | 'rejected'
-  rejection_reason       String?
-  approved_at            DateTime? @db.Timestamptz(6)
-  approved_by            String?   @db.Uuid
-  created_at             DateTime  @default(now()) @db.Timestamptz(6)
-  updated_at             DateTime  @updatedAt @db.Timestamptz(6)
+  id                      String    @id @db.Uuid
+  company_name            String
+  industry                String
+  company_size            String? // '1-10' | '11-50' | '51-200' | '201-500' | '500+'
+  business_permit_number  String?
+  company_address         String?
+  company_website         String?
+  company_logo_url        String?
+  company_cover_photo_url String?
+  company_description     String?
+  approval_status         String    @default("pending") // 'pending' | 'approved' | 'rejected'
+  rejection_reason        String?
+  approved_at             DateTime? @db.Timestamptz(6)
+  approved_by             String?   @db.Uuid
+  created_at              DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at              DateTime  @updatedAt @db.Timestamptz(6)
 
   // Relations
   profile      Profile      @relation(fields: [id], references: [id], onDelete: Cascade)

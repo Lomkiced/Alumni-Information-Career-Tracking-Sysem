@@ -39,6 +39,7 @@ export async function GET() {
       company_website: emp.company_website || "",
       company_description: emp.company_description || "",
       company_logo_url: emp.company_logo_url || "",
+      company_cover_photo_url: emp.company_cover_photo_url || "",
       approval_status: emp.approval_status,
       rejection_reason: emp.rejection_reason,
     };
@@ -94,12 +95,16 @@ export async function PUT(req: Request) {
         company_website: data.company_website || null,
         company_description: data.company_description || null,
         company_logo_url: data.company_logo_url || null,
+        company_cover_photo_url: data.company_cover_photo_url || null,
       })
       .eq("id", user.id);
 
-    if (employerErr) throw employerErr;
+    if (employerErr) {
+      console.error("Employer Update Error:", employerErr);
+      throw employerErr;
+    }
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ message: "Profile updated successfully" });
   } catch (error) {
     console.error("Error updating employer profile:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });

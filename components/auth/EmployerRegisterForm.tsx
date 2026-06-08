@@ -22,17 +22,26 @@ export function EmployerRegisterForm() {
   const [error, setError] = useState<string | null>(null);
 
   const form = useForm<EmployerRegisterInput>({
-    resolver: zodResolver(employerRegisterSchema),
-    defaultValues: { full_name: "", email: "", password: "", confirm_password: "", company_name: "", industry: "", company_size: undefined, business_permit_number: "", company_address: "", company_website: "" },
+    resolver: zodResolver(employerRegisterSchema) as any,
+    defaultValues: { full_name: "", email: "", password: "", confirm_password: "", company_name: "", industry: "", company_size: "", business_permit_number: "", company_address: "", company_website: "" } as any,
   });
 
   const onSubmit = async (data: EmployerRegisterInput) => {
     setError(null);
-    const res = await fetch("/api/auth/register/employer", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
-    const json = await res.json();
-    if (!res.ok) { setError(json.error ?? "Registration failed."); return; }
-    setSuccess(true);
-    toast.success("Registration submitted! Awaiting admin approval.");
+    try {
+      const res = await fetch("/api/auth/register/employer", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
+      const json = await res.json();
+      if (!res.ok) { setError(json.error ?? "Registration failed."); return; }
+      setSuccess(true);
+      toast.success("Registration submitted! Awaiting admin approval.");
+    } catch (err: any) {
+      setError(err.message || "An unexpected error occurred.");
+    }
+  };
+
+  const onInvalid = (errors: any) => {
+    console.log("Validation Errors:", errors);
+    toast.error("Please fill in all required fields correctly.");
   };
 
   if (success) {
@@ -57,7 +66,7 @@ export function EmployerRegisterForm() {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+      <form onSubmit={form.handleSubmit(onSubmit, onInvalid)} className="space-y-5">
         {error && <div className="rounded-lg bg-red-500/10 border border-red-500/30 px-4 py-3 text-red-300 text-sm">{error}</div>}
 
         <div className="space-y-1 pb-1">

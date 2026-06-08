@@ -5,14 +5,20 @@ export function ProfilePreview({ data }: { data: EmployerProfileInput }) {
   return (
     <div className="bg-background w-full h-full max-h-[80vh] overflow-y-auto flex flex-col rounded-lg">
       {/* Cover */}
-      <div className="h-40 bg-gradient-to-r from-pclu-navy-800 to-pclu-sky-600 w-full shrink-0"></div>
+      <div className="h-48 bg-muted w-full shrink-0 relative">
+        {data.company_cover_photo_url ? (
+          <img src={data.company_cover_photo_url} alt="Cover" className="w-full h-full object-cover" />
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-r from-pclu-navy-800 to-pclu-sky-600" />
+        )}
+      </div>
       
       {/* Content */}
       <div className="px-8 pb-8 relative flex-1">
         <div className="flex flex-col sm:flex-row gap-6 -mt-16 sm:-mt-20">
           <div className="w-32 h-32 rounded-2xl bg-white dark:bg-card border-4 border-background shadow-xl flex items-center justify-center overflow-hidden shrink-0 z-10 relative">
             {data.company_logo_url ? (
-              <img src={data.company_logo_url} alt={data.company_name} className="w-full h-full object-cover" />
+              <img src={data.company_logo_url} alt={data.company_name} className="w-full h-full object-contain p-2" />
             ) : (
               <Building2 className="w-12 h-12 text-muted-foreground/30" />
             )}

@@ -4668,6 +4668,7 @@ export namespace Prisma {
     company_address: string | null
     company_website: string | null
     company_logo_url: string | null
+    company_cover_photo_url: string | null
     company_description: string | null
     approval_status: string | null
     rejection_reason: string | null
@@ -4686,6 +4687,7 @@ export namespace Prisma {
     company_address: string | null
     company_website: string | null
     company_logo_url: string | null
+    company_cover_photo_url: string | null
     company_description: string | null
     approval_status: string | null
     rejection_reason: string | null
@@ -4704,6 +4706,7 @@ export namespace Prisma {
     company_address: number
     company_website: number
     company_logo_url: number
+    company_cover_photo_url: number
     company_description: number
     approval_status: number
     rejection_reason: number
@@ -4724,6 +4727,7 @@ export namespace Prisma {
     company_address?: true
     company_website?: true
     company_logo_url?: true
+    company_cover_photo_url?: true
     company_description?: true
     approval_status?: true
     rejection_reason?: true
@@ -4742,6 +4746,7 @@ export namespace Prisma {
     company_address?: true
     company_website?: true
     company_logo_url?: true
+    company_cover_photo_url?: true
     company_description?: true
     approval_status?: true
     rejection_reason?: true
@@ -4760,6 +4765,7 @@ export namespace Prisma {
     company_address?: true
     company_website?: true
     company_logo_url?: true
+    company_cover_photo_url?: true
     company_description?: true
     approval_status?: true
     rejection_reason?: true
@@ -4851,6 +4857,7 @@ export namespace Prisma {
     company_address: string | null
     company_website: string | null
     company_logo_url: string | null
+    company_cover_photo_url: string | null
     company_description: string | null
     approval_status: string
     rejection_reason: string | null
@@ -4886,6 +4893,7 @@ export namespace Prisma {
     company_address?: boolean
     company_website?: boolean
     company_logo_url?: boolean
+    company_cover_photo_url?: boolean
     company_description?: boolean
     approval_status?: boolean
     rejection_reason?: boolean
@@ -4908,6 +4916,7 @@ export namespace Prisma {
     company_address?: boolean
     company_website?: boolean
     company_logo_url?: boolean
+    company_cover_photo_url?: boolean
     company_description?: boolean
     approval_status?: boolean
     rejection_reason?: boolean
@@ -4928,6 +4937,7 @@ export namespace Prisma {
     company_address?: boolean
     company_website?: boolean
     company_logo_url?: boolean
+    company_cover_photo_url?: boolean
     company_description?: boolean
     approval_status?: boolean
     rejection_reason?: boolean
@@ -4948,6 +4958,7 @@ export namespace Prisma {
     company_address?: boolean
     company_website?: boolean
     company_logo_url?: boolean
+    company_cover_photo_url?: boolean
     company_description?: boolean
     approval_status?: boolean
     rejection_reason?: boolean
@@ -4957,7 +4968,7 @@ export namespace Prisma {
     updated_at?: boolean
   }
 
-  export type EmployerOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "company_name" | "industry" | "company_size" | "business_permit_number" | "company_address" | "company_website" | "company_logo_url" | "company_description" | "approval_status" | "rejection_reason" | "approved_at" | "approved_by" | "created_at" | "updated_at", ExtArgs["result"]["employer"]>
+  export type EmployerOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "company_name" | "industry" | "company_size" | "business_permit_number" | "company_address" | "company_website" | "company_logo_url" | "company_cover_photo_url" | "company_description" | "approval_status" | "rejection_reason" | "approved_at" | "approved_by" | "created_at" | "updated_at", ExtArgs["result"]["employer"]>
   export type EmployerInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     profile?: boolean | ProfileDefaultArgs<ExtArgs>
     approver?: boolean | Employer$approverArgs<ExtArgs>
@@ -4989,6 +5000,7 @@ export namespace Prisma {
       company_address: string | null
       company_website: string | null
       company_logo_url: string | null
+      company_cover_photo_url: string | null
       company_description: string | null
       approval_status: string
       rejection_reason: string | null
@@ -5430,6 +5442,7 @@ export namespace Prisma {
     readonly company_address: FieldRef<"Employer", 'String'>
     readonly company_website: FieldRef<"Employer", 'String'>
     readonly company_logo_url: FieldRef<"Employer", 'String'>
+    readonly company_cover_photo_url: FieldRef<"Employer", 'String'>
     readonly company_description: FieldRef<"Employer", 'String'>
     readonly approval_status: FieldRef<"Employer", 'String'>
     readonly rejection_reason: FieldRef<"Employer", 'String'>
@@ -15169,6 +15182,7 @@ export namespace Prisma {
     company_address: 'company_address',
     company_website: 'company_website',
     company_logo_url: 'company_logo_url',
+    company_cover_photo_url: 'company_cover_photo_url',
     company_description: 'company_description',
     approval_status: 'approval_status',
     rejection_reason: 'rejection_reason',
@@ -15687,6 +15701,7 @@ export namespace Prisma {
     company_address?: StringNullableFilter<"Employer"> | string | null
     company_website?: StringNullableFilter<"Employer"> | string | null
     company_logo_url?: StringNullableFilter<"Employer"> | string | null
+    company_cover_photo_url?: StringNullableFilter<"Employer"> | string | null
     company_description?: StringNullableFilter<"Employer"> | string | null
     approval_status?: StringFilter<"Employer"> | string
     rejection_reason?: StringNullableFilter<"Employer"> | string | null
@@ -15708,6 +15723,7 @@ export namespace Prisma {
     company_address?: SortOrderInput | SortOrder
     company_website?: SortOrderInput | SortOrder
     company_logo_url?: SortOrderInput | SortOrder
+    company_cover_photo_url?: SortOrderInput | SortOrder
     company_description?: SortOrderInput | SortOrder
     approval_status?: SortOrder
     rejection_reason?: SortOrderInput | SortOrder
@@ -15732,6 +15748,7 @@ export namespace Prisma {
     company_address?: StringNullableFilter<"Employer"> | string | null
     company_website?: StringNullableFilter<"Employer"> | string | null
     company_logo_url?: StringNullableFilter<"Employer"> | string | null
+    company_cover_photo_url?: StringNullableFilter<"Employer"> | string | null
     company_description?: StringNullableFilter<"Employer"> | string | null
     approval_status?: StringFilter<"Employer"> | string
     rejection_reason?: StringNullableFilter<"Employer"> | string | null
@@ -15753,6 +15770,7 @@ export namespace Prisma {
     company_address?: SortOrderInput | SortOrder
     company_website?: SortOrderInput | SortOrder
     company_logo_url?: SortOrderInput | SortOrder
+    company_cover_photo_url?: SortOrderInput | SortOrder
     company_description?: SortOrderInput | SortOrder
     approval_status?: SortOrder
     rejection_reason?: SortOrderInput | SortOrder
@@ -15777,6 +15795,7 @@ export namespace Prisma {
     company_address?: StringNullableWithAggregatesFilter<"Employer"> | string | null
     company_website?: StringNullableWithAggregatesFilter<"Employer"> | string | null
     company_logo_url?: StringNullableWithAggregatesFilter<"Employer"> | string | null
+    company_cover_photo_url?: StringNullableWithAggregatesFilter<"Employer"> | string | null
     company_description?: StringNullableWithAggregatesFilter<"Employer"> | string | null
     approval_status?: StringWithAggregatesFilter<"Employer"> | string
     rejection_reason?: StringNullableWithAggregatesFilter<"Employer"> | string | null
@@ -16740,6 +16759,7 @@ export namespace Prisma {
     company_address?: string | null
     company_website?: string | null
     company_logo_url?: string | null
+    company_cover_photo_url?: string | null
     company_description?: string | null
     approval_status?: string
     rejection_reason?: string | null
@@ -16760,6 +16780,7 @@ export namespace Prisma {
     company_address?: string | null
     company_website?: string | null
     company_logo_url?: string | null
+    company_cover_photo_url?: string | null
     company_description?: string | null
     approval_status?: string
     rejection_reason?: string | null
@@ -16778,6 +16799,7 @@ export namespace Prisma {
     company_address?: NullableStringFieldUpdateOperationsInput | string | null
     company_website?: NullableStringFieldUpdateOperationsInput | string | null
     company_logo_url?: NullableStringFieldUpdateOperationsInput | string | null
+    company_cover_photo_url?: NullableStringFieldUpdateOperationsInput | string | null
     company_description?: NullableStringFieldUpdateOperationsInput | string | null
     approval_status?: StringFieldUpdateOperationsInput | string
     rejection_reason?: NullableStringFieldUpdateOperationsInput | string | null
@@ -16798,6 +16820,7 @@ export namespace Prisma {
     company_address?: NullableStringFieldUpdateOperationsInput | string | null
     company_website?: NullableStringFieldUpdateOperationsInput | string | null
     company_logo_url?: NullableStringFieldUpdateOperationsInput | string | null
+    company_cover_photo_url?: NullableStringFieldUpdateOperationsInput | string | null
     company_description?: NullableStringFieldUpdateOperationsInput | string | null
     approval_status?: StringFieldUpdateOperationsInput | string
     rejection_reason?: NullableStringFieldUpdateOperationsInput | string | null
@@ -16817,6 +16840,7 @@ export namespace Prisma {
     company_address?: string | null
     company_website?: string | null
     company_logo_url?: string | null
+    company_cover_photo_url?: string | null
     company_description?: string | null
     approval_status?: string
     rejection_reason?: string | null
@@ -16834,6 +16858,7 @@ export namespace Prisma {
     company_address?: NullableStringFieldUpdateOperationsInput | string | null
     company_website?: NullableStringFieldUpdateOperationsInput | string | null
     company_logo_url?: NullableStringFieldUpdateOperationsInput | string | null
+    company_cover_photo_url?: NullableStringFieldUpdateOperationsInput | string | null
     company_description?: NullableStringFieldUpdateOperationsInput | string | null
     approval_status?: StringFieldUpdateOperationsInput | string
     rejection_reason?: NullableStringFieldUpdateOperationsInput | string | null
@@ -16851,6 +16876,7 @@ export namespace Prisma {
     company_address?: NullableStringFieldUpdateOperationsInput | string | null
     company_website?: NullableStringFieldUpdateOperationsInput | string | null
     company_logo_url?: NullableStringFieldUpdateOperationsInput | string | null
+    company_cover_photo_url?: NullableStringFieldUpdateOperationsInput | string | null
     company_description?: NullableStringFieldUpdateOperationsInput | string | null
     approval_status?: StringFieldUpdateOperationsInput | string
     rejection_reason?: NullableStringFieldUpdateOperationsInput | string | null
@@ -18038,6 +18064,7 @@ export namespace Prisma {
     company_address?: SortOrder
     company_website?: SortOrder
     company_logo_url?: SortOrder
+    company_cover_photo_url?: SortOrder
     company_description?: SortOrder
     approval_status?: SortOrder
     rejection_reason?: SortOrder
@@ -18056,6 +18083,7 @@ export namespace Prisma {
     company_address?: SortOrder
     company_website?: SortOrder
     company_logo_url?: SortOrder
+    company_cover_photo_url?: SortOrder
     company_description?: SortOrder
     approval_status?: SortOrder
     rejection_reason?: SortOrder
@@ -18074,6 +18102,7 @@ export namespace Prisma {
     company_address?: SortOrder
     company_website?: SortOrder
     company_logo_url?: SortOrder
+    company_cover_photo_url?: SortOrder
     company_description?: SortOrder
     approval_status?: SortOrder
     rejection_reason?: SortOrder
@@ -19678,6 +19707,7 @@ export namespace Prisma {
     company_address?: string | null
     company_website?: string | null
     company_logo_url?: string | null
+    company_cover_photo_url?: string | null
     company_description?: string | null
     approval_status?: string
     rejection_reason?: string | null
@@ -19696,6 +19726,7 @@ export namespace Prisma {
     company_address?: string | null
     company_website?: string | null
     company_logo_url?: string | null
+    company_cover_photo_url?: string | null
     company_description?: string | null
     approval_status?: string
     rejection_reason?: string | null
@@ -19821,6 +19852,7 @@ export namespace Prisma {
     company_address?: string | null
     company_website?: string | null
     company_logo_url?: string | null
+    company_cover_photo_url?: string | null
     company_description?: string | null
     approval_status?: string
     rejection_reason?: string | null
@@ -19840,6 +19872,7 @@ export namespace Prisma {
     company_address?: string | null
     company_website?: string | null
     company_logo_url?: string | null
+    company_cover_photo_url?: string | null
     company_description?: string | null
     approval_status?: string
     rejection_reason?: string | null
@@ -20003,6 +20036,7 @@ export namespace Prisma {
     company_address?: NullableStringFieldUpdateOperationsInput | string | null
     company_website?: NullableStringFieldUpdateOperationsInput | string | null
     company_logo_url?: NullableStringFieldUpdateOperationsInput | string | null
+    company_cover_photo_url?: NullableStringFieldUpdateOperationsInput | string | null
     company_description?: NullableStringFieldUpdateOperationsInput | string | null
     approval_status?: StringFieldUpdateOperationsInput | string
     rejection_reason?: NullableStringFieldUpdateOperationsInput | string | null
@@ -20021,6 +20055,7 @@ export namespace Prisma {
     company_address?: NullableStringFieldUpdateOperationsInput | string | null
     company_website?: NullableStringFieldUpdateOperationsInput | string | null
     company_logo_url?: NullableStringFieldUpdateOperationsInput | string | null
+    company_cover_photo_url?: NullableStringFieldUpdateOperationsInput | string | null
     company_description?: NullableStringFieldUpdateOperationsInput | string | null
     approval_status?: StringFieldUpdateOperationsInput | string
     rejection_reason?: NullableStringFieldUpdateOperationsInput | string | null
@@ -20155,6 +20190,7 @@ export namespace Prisma {
     company_address?: StringNullableFilter<"Employer"> | string | null
     company_website?: StringNullableFilter<"Employer"> | string | null
     company_logo_url?: StringNullableFilter<"Employer"> | string | null
+    company_cover_photo_url?: StringNullableFilter<"Employer"> | string | null
     company_description?: StringNullableFilter<"Employer"> | string | null
     approval_status?: StringFilter<"Employer"> | string
     rejection_reason?: StringNullableFilter<"Employer"> | string | null
@@ -20894,6 +20930,7 @@ export namespace Prisma {
     company_address?: string | null
     company_website?: string | null
     company_logo_url?: string | null
+    company_cover_photo_url?: string | null
     company_description?: string | null
     approval_status?: string
     rejection_reason?: string | null
@@ -20913,6 +20950,7 @@ export namespace Prisma {
     company_address?: string | null
     company_website?: string | null
     company_logo_url?: string | null
+    company_cover_photo_url?: string | null
     company_description?: string | null
     approval_status?: string
     rejection_reason?: string | null
@@ -20978,6 +21016,7 @@ export namespace Prisma {
     company_address?: NullableStringFieldUpdateOperationsInput | string | null
     company_website?: NullableStringFieldUpdateOperationsInput | string | null
     company_logo_url?: NullableStringFieldUpdateOperationsInput | string | null
+    company_cover_photo_url?: NullableStringFieldUpdateOperationsInput | string | null
     company_description?: NullableStringFieldUpdateOperationsInput | string | null
     approval_status?: StringFieldUpdateOperationsInput | string
     rejection_reason?: NullableStringFieldUpdateOperationsInput | string | null
@@ -20997,6 +21036,7 @@ export namespace Prisma {
     company_address?: NullableStringFieldUpdateOperationsInput | string | null
     company_website?: NullableStringFieldUpdateOperationsInput | string | null
     company_logo_url?: NullableStringFieldUpdateOperationsInput | string | null
+    company_cover_photo_url?: NullableStringFieldUpdateOperationsInput | string | null
     company_description?: NullableStringFieldUpdateOperationsInput | string | null
     approval_status?: StringFieldUpdateOperationsInput | string
     rejection_reason?: NullableStringFieldUpdateOperationsInput | string | null
@@ -21993,6 +22033,7 @@ export namespace Prisma {
     company_address?: string | null
     company_website?: string | null
     company_logo_url?: string | null
+    company_cover_photo_url?: string | null
     company_description?: string | null
     approval_status?: string
     rejection_reason?: string | null
@@ -22139,6 +22180,7 @@ export namespace Prisma {
     company_address?: NullableStringFieldUpdateOperationsInput | string | null
     company_website?: NullableStringFieldUpdateOperationsInput | string | null
     company_logo_url?: NullableStringFieldUpdateOperationsInput | string | null
+    company_cover_photo_url?: NullableStringFieldUpdateOperationsInput | string | null
     company_description?: NullableStringFieldUpdateOperationsInput | string | null
     approval_status?: StringFieldUpdateOperationsInput | string
     rejection_reason?: NullableStringFieldUpdateOperationsInput | string | null
@@ -22158,6 +22200,7 @@ export namespace Prisma {
     company_address?: NullableStringFieldUpdateOperationsInput | string | null
     company_website?: NullableStringFieldUpdateOperationsInput | string | null
     company_logo_url?: NullableStringFieldUpdateOperationsInput | string | null
+    company_cover_photo_url?: NullableStringFieldUpdateOperationsInput | string | null
     company_description?: NullableStringFieldUpdateOperationsInput | string | null
     approval_status?: StringFieldUpdateOperationsInput | string
     rejection_reason?: NullableStringFieldUpdateOperationsInput | string | null
@@ -22176,6 +22219,7 @@ export namespace Prisma {
     company_address?: NullableStringFieldUpdateOperationsInput | string | null
     company_website?: NullableStringFieldUpdateOperationsInput | string | null
     company_logo_url?: NullableStringFieldUpdateOperationsInput | string | null
+    company_cover_photo_url?: NullableStringFieldUpdateOperationsInput | string | null
     company_description?: NullableStringFieldUpdateOperationsInput | string | null
     approval_status?: StringFieldUpdateOperationsInput | string
     rejection_reason?: NullableStringFieldUpdateOperationsInput | string | null
