@@ -46,6 +46,7 @@ interface ProfileRow {
   full_name: string;
   role: string;
   profile_photo_url: string | null;
+  cover_photo_url: string | null;
   birthdate: string | null;
   is_active: boolean;
   is_searchable: boolean;
@@ -71,6 +72,7 @@ export default async function NetworkProfilePage({ params }: NetworkProfilePageP
       full_name,
       role,
       profile_photo_url,
+      cover_photo_url,
       birthdate,
       is_active,
       is_searchable,
@@ -119,7 +121,11 @@ export default async function NetworkProfilePage({ params }: NetworkProfilePageP
       <BackButton />
       {/* ── Header Card ─────────────────────────────────────────────────── */}
       <Card className="overflow-hidden border-border/50 shadow-sm">
-        <div className="h-32 bg-gradient-to-r from-primary/20 via-primary/10 to-transparent" />
+        <div className="h-64 sm:h-80 bg-gradient-to-r from-primary/20 via-primary/10 to-transparent relative">
+          {profileData.cover_photo_url && (
+            <img src={profileData.cover_photo_url} alt="Cover" className="w-full h-full object-cover object-[center_25%] absolute inset-0" />
+          )}
+        </div>
         <CardContent className="relative px-6 pb-6 pt-0 sm:px-10">
           <div className="flex flex-col sm:flex-row gap-6 items-center sm:items-end -mt-16 mb-4">
             <Avatar className="w-32 h-32 border-4 border-background shadow-xl rounded-full bg-muted">

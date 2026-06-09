@@ -130,7 +130,7 @@ export function ChatWindow({
       >
         {targetProfile ? (
           <Avatar className="h-full w-full rounded-full">
-            <AvatarImage src={targetProfile.profile_photo_url || ""} />
+            <AvatarImage src={targetProfile.profile_photo_url || undefined} />
             <AvatarFallback className="bg-primary text-primary-foreground text-lg font-bold">
               {formatInitials(targetProfile.full_name)}
             </AvatarFallback>
@@ -158,7 +158,7 @@ export function ChatWindow({
         <div className="flex items-center gap-2 overflow-hidden">
           {targetProfile ? (
             <Avatar className="h-8 w-8 border border-primary-foreground/20 shrink-0">
-              <AvatarImage src={targetProfile.profile_photo_url || ""} />
+              <AvatarImage src={targetProfile.profile_photo_url || undefined} />
               <AvatarFallback className="bg-primary-foreground/20 text-primary-foreground text-xs">
                 {formatInitials(targetProfile.full_name)}
               </AvatarFallback>
@@ -192,7 +192,7 @@ export function ChatWindow({
               return (
                 <div key={msg.id} className={`flex gap-2 group ${isMe ? "justify-end" : "justify-start"}`}>
                   {!isMe && showAvatar ? (
-                    <Avatar className="h-6 w-6 mt-1 shrink-0"><AvatarImage src={targetProfile?.profile_photo_url || ""} /><AvatarFallback className="text-[10px]">{formatInitials(targetProfile?.full_name)}</AvatarFallback></Avatar>
+                    <Avatar className="h-6 w-6 mt-1 shrink-0"><AvatarImage src={targetProfile?.profile_photo_url || undefined} /><AvatarFallback className="text-[10px]">{formatInitials(targetProfile?.full_name)}</AvatarFallback></Avatar>
                   ) : <div className="w-6 shrink-0" />}
                   
                   {isMe && !msg.id.startsWith('temp-') && (

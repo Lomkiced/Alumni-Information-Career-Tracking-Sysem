@@ -14,9 +14,9 @@ export async function GET() {
 
     const { data: profile, error: profileErr } = await supabase
       .from("profiles")
-      .select("id, full_name, email, phone, profile_photo_url, role, is_verified, created_at")
+      .select("id, full_name, email, phone, profile_photo_url, cover_photo_url, role, is_verified, created_at")
       .eq("id", user.id)
-      .single<{ id: string; full_name: string; email: string; phone: string | null; profile_photo_url: string | null; role: string; is_verified: boolean; created_at: string }>();
+      .single<{ id: string; full_name: string; email: string; phone: string | null; profile_photo_url: string | null; cover_photo_url: string | null; role: string; is_verified: boolean; created_at: string }>();
     if (profileErr) throw profileErr;
 
     const { data: alumni, error: alumniErr } = await supabase

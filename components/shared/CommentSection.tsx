@@ -122,7 +122,7 @@ export function CommentSection({ announcementId }: CommentSectionProps) {
         
         <Link href={`/network/${comment.user_id}`} className="shrink-0 transition-opacity hover:opacity-80">
           <Avatar className={`${isReply ? "w-8 h-8" : "w-10 h-10"} ring-2 ring-background`}>
-            <AvatarImage src={comment.profiles?.profile_photo_url ?? ""} />
+            <AvatarImage src={comment.profiles?.profile_photo_url || undefined} />
             <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
               {formatInitials(comment.profiles?.full_name ?? "Unknown User")}
             </AvatarFallback>
@@ -231,7 +231,7 @@ export function CommentSection({ announcementId }: CommentSectionProps) {
       {replyingTo === null && (
         <div className="flex gap-3 mb-8">
           <Avatar className="shrink-0 w-10 h-10 ring-2 ring-background">
-            <AvatarImage src={profile?.profile_photo_url ?? ""} />
+            <AvatarImage src={profile?.profile_photo_url || undefined} />
             <AvatarFallback className="bg-primary/10 text-primary text-sm font-semibold">
               {formatInitials(profile?.full_name)}
             </AvatarFallback>

@@ -79,7 +79,7 @@ export function GlobalSearch() {
                 className="flex items-center gap-3 p-3 hover:bg-muted/50 cursor-pointer transition-colors border-b border-border/50 last:border-0"
               >
                 <Avatar className="h-10 w-10 shrink-0">
-                  <AvatarImage src={r.profile_photo_url || ""} />
+                  <AvatarImage src={r.profile_photo_url || undefined} />
                   <AvatarFallback className="bg-primary/10 text-primary">
                     {formatInitials(r.full_name || (r.role === "employer" ? r.employer?.company_name : "?"))}
                   </AvatarFallback>
