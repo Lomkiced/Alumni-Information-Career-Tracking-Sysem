@@ -34,6 +34,9 @@ export default function AdminEmployersPage() {
   const [tab, setTab] = useState<typeof FILTER_TABS[number]>("all");
   const [actionId, setActionId] = useState<string | null>(null);
   const [actionType, setActionType] = useState<"approve" | "reject" | null>(null);
+  
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [deleteName, setDeleteName] = useState<string | null>(null);
 
   const fetchEmployers = useCallback(async () => {
     setLoading(true);
@@ -70,19 +73,27 @@ export default function AdminEmployersPage() {
     setActionType(null);
   };
 
-  const handleDelete = async (id: string, name: string) => {
-    if (!window.confirm(`Are you sure you want to permanently delete employer: ${name}? This action cannot be undone.`)) return;
+  const confirmDelete = (id: string, name: string) => {
+    setDeleteId(id);
+    setDeleteName(name || "Unknown");
+  };
 
-    setEmployers(prev => prev.filter(e => e.id !== id));
+  const handleDelete = async () => {
+    if (!deleteId) return;
+
+    setEmployers(prev => prev.filter(e => e.id !== deleteId));
 
     try {
-      const res = await fetch(`/api/admin/employers/${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/admin/employers/${deleteId}`, { method: "DELETE" });
       if (!res.ok) throw new Error("Failed to delete");
       toast.success("Employer deleted successfully");
     } catch (err) {
       console.error(err);
       toast.error("Failed to delete employer");
       fetchEmployers(); // restore
+    } finally {
+      setDeleteId(null);
+      setDeleteName(null);
     }
   };
 
@@ -183,7 +194,7 @@ export default function AdminEmployersPage() {
                         size="icon"
                         variant="ghost"
                         className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 shrink-0"
-                        onClick={() => handleDelete(emp.id, emp.company_name)}
+                        onClick={() => confirmDelete(emp.id, emp.company_name)}
                         title="Delete Employer"
                       >
                         <Trash2 size={16} />
@@ -221,7 +232,19 @@ export default function AdminEmployersPage() {
         confirmVariant="destructive"
         requireReason
         reasonLabel="Rejection Reason"
-        reasonPlaceholder="e.g. Incomplete business permit information..."
+        reasonPlaceholder="Why is this registration being rejected? (Will be emailed to the user)"
+      />
+      <ConfirmDialog
+        open={!!deleteId}
+        onClose={() => {
+          setDeleteId(null);
+          setDeleteName(null);
+        }}
+        onConfirm={handleDelete}
+        title="Delete Employer"
+        description={`Are you sure you want to permanently delete employer: ${deleteName}? This action cannot be undone.`}
+        confirmLabel="Delete Employer"
+        confirmVariant="destructive"
       />
     </div>
   );
