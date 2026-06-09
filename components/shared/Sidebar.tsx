@@ -10,6 +10,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
+import { useUnreadMessages } from "@/providers/UnreadMessagesProvider";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { formatInitials } from "@/lib/utils/format";
 
@@ -59,6 +60,7 @@ interface SidebarProps {
 export function Sidebar({ onClose }: SidebarProps) {
   const pathname = usePathname();
   const { profile, loading, signOut } = useAuth();
+  const { unreadCount } = useUnreadMessages();
   
   if (loading) {
     return (
@@ -100,6 +102,8 @@ export function Sidebar({ onClose }: SidebarProps) {
       <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
         {menu.map(({ href, icon: Icon, label }) => {
           const isActive = pathname === href || (href !== "/admin/dashboard" && pathname.startsWith(href));
+          const isMessages = label === "Messages";
+          
           return (
             <Link
               key={href}
@@ -114,7 +118,15 @@ export function Sidebar({ onClose }: SidebarProps) {
             >
               <Icon size={20} className={cn("shrink-0", isActive ? "text-sidebar-primary-foreground" : "text-sidebar-foreground/50 group-hover:text-sidebar-accent-foreground")} />
               <span className="flex-1">{label}</span>
-              {isActive && <ChevronRight size={16} className="opacity-60" />}
+              
+              {/* Unread Messages Badge */}
+              {isMessages && unreadCount > 0 && (
+                <span className="bg-destructive text-destructive-foreground text-[10px] font-bold px-2 py-0.5 rounded-full animate-in zoom-in spin-in-2 duration-300">
+                  {unreadCount > 99 ? '99+' : unreadCount}
+                </span>
+              )}
+              
+              {isActive && !isMessages && <ChevronRight size={16} className="opacity-60" />}
             </Link>
           );
         })}

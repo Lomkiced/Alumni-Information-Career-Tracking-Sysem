@@ -5,6 +5,7 @@ import { Users, Search, Download, GraduationCap, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/shared/PageHeader";
+import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { Input } from "@/components/ui/input";
@@ -31,6 +32,8 @@ export default function AdminAlumniPage() {
   const [search, setSearch] = useState("");
   const [course, setCourse] = useState("");
   const [batchYear, setBatchYear] = useState("");
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [deleteName, setDeleteName] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const PAGE_SIZE = 20;
@@ -75,20 +78,28 @@ export default function AdminAlumniPage() {
   const currentStatus = (records: AlumniRecord["career_records"]) =>
     records?.find(r => r.is_current)?.employment_status;
 
-  const handleDelete = async (id: string, name: string) => {
-    if (!window.confirm(`Are you sure you want to permanently delete alumni: ${name}? This action cannot be undone.`)) return;
+  const confirmDelete = (id: string, name: string) => {
+    setDeleteId(id);
+    setDeleteName(name || "Unknown");
+  };
 
-    setAlumni(prev => prev.filter(a => a.id !== id));
+  const handleDelete = async () => {
+    if (!deleteId) return;
+
+    setAlumni(prev => prev.filter(a => a.id !== deleteId));
     setTotal(t => t - 1);
 
     try {
-      const res = await fetch(`/api/admin/alumni/${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/admin/alumni/${deleteId}`, { method: "DELETE" });
       if (!res.ok) throw new Error("Failed to delete");
       toast.success("Alumni deleted successfully");
     } catch (err) {
       console.error(err);
       toast.error("Failed to delete alumni");
       fetchAlumni(); // refresh to restore
+    } finally {
+      setDeleteId(null);
+      setDeleteName(null);
     }
   };
 
@@ -183,7 +194,7 @@ export default function AdminAlumniPage() {
                           variant="ghost" 
                           size="icon" 
                           className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-                          onClick={() => handleDelete(a.id, a.profiles?.full_name)}
+                          onClick={() => confirmDelete(a.id, a.profiles?.full_name || "Unknown")}
                           title="Delete Alumni"
                         >
                           <Trash2 size={16} />
@@ -208,6 +219,19 @@ export default function AdminAlumniPage() {
           )}
         </>
       )}
+
+      <ConfirmDialog
+        open={!!deleteId}
+        onClose={() => {
+          setDeleteId(null);
+          setDeleteName(null);
+        }}
+        onConfirm={handleDelete}
+        title="Delete Alumni"
+        description={`Are you sure you want to permanently delete alumni: ${deleteName}? This action cannot be undone and will delete all associated records.`}
+        confirmLabel="Delete Alumni"
+        confirmVariant="destructive"
+      />
     </div>
   );
 }
