@@ -4,6 +4,7 @@ import { Sidebar } from "@/components/shared/Sidebar";
 import { Navbar } from "@/components/shared/Navbar";
 import { FloatingChat } from "@/components/shared/FloatingChat";
 import { Suspense } from "react";
+import { VerificationToast } from "@/components/shared/VerificationToast";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -23,9 +24,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </main>
       </div>
 
-      {/* Global Floating Chat */}
+      {/* Global Elements */}
       <Suspense fallback={null}>
         <FloatingChat />
+        <VerificationToast />
       </Suspense>
     </div>
   );

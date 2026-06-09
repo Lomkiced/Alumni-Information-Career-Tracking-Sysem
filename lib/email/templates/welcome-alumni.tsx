@@ -2,9 +2,11 @@
 export function welcomeAlumniHtml({
   full_name,
   email,
+  action_link,
 }: {
   full_name: string;
   email: string;
+  action_link: string;
 }): string {
   return `<!DOCTYPE html>
 <html>
@@ -34,6 +36,11 @@ export function welcomeAlumniHtml({
             <p style="margin:0 0 24px;color:#4a5568;font-size:15px;line-height:1.7;">
               Please verify your email address to activate your account and start using the system.
             </p>
+            <div style="text-align:center;margin:0 0 32px;">
+              <a href="${action_link}" style="display:inline-block;background:#2d7d32;color:#fff;font-weight:600;font-size:16px;text-decoration:none;padding:12px 24px;border-radius:6px;box-shadow:0 2px 8px rgba(45,125,50,0.3);">
+                Verify Email Address
+              </a>
+            </div>
             <div style="background:#f7fafc;border-radius:8px;padding:20px;margin:0 0 24px;border-left:4px solid #2d7d32;">
               <p style="margin:0;color:#2d7d32;font-weight:600;font-size:14px;">📧 Registered Email</p>
               <p style="margin:4px 0 0;color:#1e3a5f;font-size:15px;">${email}</p>

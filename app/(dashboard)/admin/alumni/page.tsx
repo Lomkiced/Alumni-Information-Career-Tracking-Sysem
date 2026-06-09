@@ -1,8 +1,9 @@
 "use client";
 // app/(dashboard)/admin/alumni/page.tsx
 import { useState, useEffect, useCallback } from "react";
-import { Users, Search, Download, GraduationCap } from "lucide-react";
+import { Users, Search, Download, GraduationCap, Trash2 } from "lucide-react";
 import { format } from "date-fns";
+import { toast } from "sonner";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { EmptyState } from "@/components/shared/EmptyState";
@@ -74,6 +75,23 @@ export default function AdminAlumniPage() {
   const currentStatus = (records: AlumniRecord["career_records"]) =>
     records?.find(r => r.is_current)?.employment_status;
 
+  const handleDelete = async (id: string, name: string) => {
+    if (!window.confirm(`Are you sure you want to permanently delete alumni: ${name}? This action cannot be undone.`)) return;
+
+    setAlumni(prev => prev.filter(a => a.id !== id));
+    setTotal(t => t - 1);
+
+    try {
+      const res = await fetch(`/api/admin/alumni/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Failed to delete");
+      toast.success("Alumni deleted successfully");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to delete alumni");
+      fetchAlumni(); // refresh to restore
+    }
+  };
+
   return (
     <div className="space-y-6">
       <PageHeader icon={Users} title="Alumni Management" description={`${total} total alumni registered`}>
@@ -130,6 +148,7 @@ export default function AdminAlumniPage() {
                   <th className="text-left px-4 py-3 font-medium text-muted-foreground">Employment</th>
                   <th className="text-left px-4 py-3 font-medium text-muted-foreground hidden lg:table-cell">Location</th>
                   <th className="text-left px-4 py-3 font-medium text-muted-foreground hidden xl:table-cell">Registered</th>
+                  <th className="text-right px-4 py-3 font-medium text-muted-foreground">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -158,6 +177,17 @@ export default function AdminAlumniPage() {
                       </td>
                       <td className="px-4 py-3 text-muted-foreground hidden xl:table-cell">
                         {format(new Date(a.created_at), "MMM d, yyyy")}
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                          onClick={() => handleDelete(a.id, a.profiles?.full_name)}
+                          title="Delete Alumni"
+                        >
+                          <Trash2 size={16} />
+                        </Button>
                       </td>
                     </tr>
                   );

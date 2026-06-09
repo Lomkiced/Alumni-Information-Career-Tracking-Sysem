@@ -19,6 +19,7 @@ export const employerProfileSchema = z.object({
     }),
   company_description: z.string().optional(),
   company_logo_url: z.string().optional(),
+  company_cover_photo_url: z.string().optional(),
 });
 
 export type EmployerProfileInput = z.infer<typeof employerProfileSchema>;

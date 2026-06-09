@@ -14,6 +14,11 @@ export async function GET(request: Request) {
       // Determine where to redirect based on role
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
+        // 1. Update the custom profiles table to mark email as verified!
+        await (supabase.from("profiles") as any)
+          .update({ is_verified: true })
+          .eq("id", user.id);
+
         const { data: profile } = await supabase
           .from("profiles")
           .select("role")
@@ -26,7 +31,12 @@ export async function GET(request: Request) {
             admin: "/admin/dashboard",
             employer: "/employer/jobs",
           };
-          return NextResponse.redirect(`${origin}${roleRedirects[profile.role] ?? next}`);
+          
+          // 2. Append ?verified=true so the UI can show a toast
+          const targetUrl = new URL(`${origin}${roleRedirects[profile.role] ?? next}`);
+          targetUrl.searchParams.set("verified", "true");
+          
+          return NextResponse.redirect(targetUrl.href);
         }
       }
       return NextResponse.redirect(`${origin}${next}`);

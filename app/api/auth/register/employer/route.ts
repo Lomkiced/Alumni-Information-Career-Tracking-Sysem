@@ -2,7 +2,7 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
 import { employerRegisterSchema } from "@/lib/validations/auth.schema";
-import { resend, FROM_EMAIL } from "@/lib/email/resend";
+import { transporter, FROM_EMAIL } from "@/lib/email/nodemailer";
 import { welcomeEmployerHtml } from "@/lib/email/templates/welcome-employer";
 import { logAudit, AUDIT_ACTIONS } from "@/lib/utils/audit";
 
@@ -48,8 +48,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Failed to create employer record" }, { status: 500 });
     }
 
-    resend.emails.send({ from: FROM_EMAIL, to: email, subject: "AICTS — Employer Registration Received", html: welcomeEmployerHtml({ full_name, company_name }) })
-      .catch((e) => console.error("[Resend]", e));
+    transporter.sendMail({ from: FROM_EMAIL, to: email, subject: "AICTS — Employer Registration Received", html: welcomeEmployerHtml({ full_name, company_name }) })
+      .catch((e: any) => console.error("[Nodemailer] Failed to send email. Check your SMTP_EMAIL and SMTP_PASSWORD. Error:", e.message));
 
     await logAudit({ userId, action: AUDIT_ACTIONS.CREATE_EMPLOYER, tableName: "employers", recordId: userId, newValues: { company_name, industry } });
 

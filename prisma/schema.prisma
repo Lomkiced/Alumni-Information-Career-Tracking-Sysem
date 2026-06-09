@@ -83,6 +83,7 @@ model Employer {
   company_address       String?
   company_website       String?
   company_logo_url      String?
+  company_cover_photo_url String?
   company_description   String?
   approval_status       String    @default("pending") // 'pending' | 'approved' | 'rejected'
   rejection_reason      String?

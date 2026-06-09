@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useForm } from "react-hook-form";
+import { createClient } from "@/lib/supabase/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { employerProfileSchema, type EmployerProfileInput } from "@/lib/validations/employer.schema";
 import { toast } from "sonner";
@@ -12,15 +13,30 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Loader2, Save, Eye, Building2, Contact, ShieldCheck, Image as ImageIcon } from "lucide-react";
+import { Loader2, Save, Eye, Building2, Contact, ShieldCheck, Image as ImageIcon, Globe, Camera } from "lucide-react";
 import { RichTextEditor } from "@/components/ui/rich-text-editor";
 import { ProfilePreview } from "./ProfilePreview";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 
+function getLogoUrl(website?: string | null) {
+  if (!website) return null;
+  try {
+    const domain = new URL(website.startsWith("http") ? website : `https://${website}`).hostname.replace("www.", "");
+    return `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
+  } catch {
+    return null;
+  }
+}
+
 export function ProfileForm() {
+  const supabase = createClient();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [approvalStatus, setApprovalStatus] = useState("pending");
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [uploadingCover, setUploadingCover] = useState(false);
+  const logoRef = useRef<HTMLInputElement>(null);
+  const coverRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<EmployerProfileInput>({
     resolver: zodResolver(employerProfileSchema),
@@ -30,6 +46,7 @@ export function ProfileForm() {
       company_size: undefined,
       company_website: "",
       company_logo_url: "",
+      company_cover_photo_url: "",
       company_description: "",
       full_name: "",
       phone: "",
@@ -58,13 +75,58 @@ export function ProfileForm() {
     loadProfile();
   }, [form]);
 
+  const handlePhotoUpload = async (type: "logo" | "cover", e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { toast.error("File must be under 5MB"); return; }
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) { toast.error("Only JPG, PNG, WebP allowed"); return; }
+
+    const isLogo = type === "logo";
+    if (isLogo) setUploadingLogo(true);
+    else setUploadingCover(true);
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not logged in");
+      
+      const ext = file.name.split(".").pop();
+      const path = `employers/${user.id}/${type}_${Date.now()}.${ext}`;
+      
+      const { error: uploadErr } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
+      if (uploadErr) throw uploadErr;
+
+      const { data: { publicUrl } } = supabase.storage.from("avatars").getPublicUrl(path);
+      
+      if (isLogo) {
+        form.setValue("company_logo_url", publicUrl, { shouldDirty: true });
+        toast.success("Logo uploaded! Click 'Save Changes' to apply.");
+      } else {
+        form.setValue("company_cover_photo_url", publicUrl, { shouldDirty: true });
+        toast.success("Cover photo uploaded! Click 'Save Changes' to apply.");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Upload failed. Please try again.");
+    } finally {
+      if (isLogo) setUploadingLogo(false);
+      else setUploadingCover(false);
+      e.target.value = "";
+    }
+  };
+
   async function onSubmit(values: EmployerProfileInput) {
     setSaving(true);
     try {
+      const generatedLogo = getLogoUrl(values.company_website);
+      const payload = {
+        ...values,
+        company_logo_url: generatedLogo || values.company_logo_url,
+      };
+
       const res = await fetch("/api/employer/profile", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
+        body: JSON.stringify(payload),
       });
 
       if (res.ok) {
@@ -93,17 +155,48 @@ export function ProfileForm() {
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 pb-10">
         
         {/* Header/Cover Photo Area */}
-        <div className="relative rounded-2xl overflow-hidden border bg-card">
-          <div className="h-32 bg-gradient-to-r from-pclu-navy-800 to-pclu-sky-600"></div>
+        <div className="relative rounded-2xl overflow-hidden border bg-card group/cover">
+          <div className="h-48 w-full relative bg-muted flex items-center justify-center overflow-hidden">
+            {form.watch("company_cover_photo_url") ? (
+              <img src={form.watch("company_cover_photo_url") || ""} alt="Cover" className="w-full h-full object-cover" />
+            ) : (
+              <div className="absolute inset-0 bg-gradient-to-r from-pclu-navy-800 to-pclu-sky-600" />
+            )}
+            
+            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/cover:opacity-100 transition-opacity flex items-center justify-center">
+              <button
+                type="button"
+                onClick={() => coverRef.current?.click()}
+                disabled={uploadingCover}
+                className="bg-white/20 hover:bg-white/30 backdrop-blur-md text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition-colors"
+              >
+                {uploadingCover ? <Loader2 size={16} className="animate-spin" /> : <Camera size={16} />}
+                Change Cover Photo
+              </button>
+            </div>
+            <input ref={coverRef} type="file" accept="image/*" className="hidden" onChange={(e) => handlePhotoUpload("cover", e)} />
+          </div>
+          
           <div className="px-8 pb-6">
             <div className="flex flex-col sm:flex-row gap-6 sm:items-end -mt-12 relative z-10">
               {/* Logo Preview */}
-              <div className="w-24 h-24 rounded-xl bg-background border-4 border-background shadow-lg flex items-center justify-center overflow-hidden shrink-0">
-                {form.watch("company_logo_url") ? (
-                  <img src={form.watch("company_logo_url")} alt="Logo" className="w-full h-full object-cover" />
-                ) : (
-                  <Building2 className="w-10 h-10 text-muted-foreground/50" />
-                )}
+              <div className="relative group/logo shrink-0">
+                <div className="w-24 h-24 rounded-xl bg-white border-4 border-background shadow-lg flex items-center justify-center overflow-hidden">
+                  {(form.watch("company_logo_url") || getLogoUrl(form.watch("company_website"))) ? (
+                    <img src={form.watch("company_logo_url") || getLogoUrl(form.watch("company_website")) || ""} alt="Logo" className="w-full h-full object-contain p-2" />
+                  ) : (
+                    <Building2 className="w-10 h-10 text-muted-foreground/50" />
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => logoRef.current?.click()}
+                  disabled={uploadingLogo}
+                  className="absolute bottom-[-8px] right-[-8px] w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-lg hover:bg-primary/90 transition-colors z-20"
+                >
+                  {uploadingLogo ? <Loader2 size={14} className="animate-spin" /> : <Camera size={14} />}
+                </button>
+                <input ref={logoRef} type="file" accept="image/*" className="hidden" onChange={(e) => handlePhotoUpload("logo", e)} />
               </div>
               <div className="flex-1 space-y-1">
                 <h2 className="text-2xl font-bold">{form.watch("company_name") || "Your Company Name"}</h2>
@@ -195,14 +288,14 @@ export function ProfileForm() {
                   />
                   <FormField
                     control={form.control}
-                    name="company_logo_url"
+                    name="company_website"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Company Logo URL</FormLabel>
+                        <FormLabel>Company Website (Optional)</FormLabel>
                         <FormControl>
                           <div className="relative">
-                            <ImageIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-5 h-5" />
-                            <Input placeholder="https://example.com/logo.png" className="pl-10" {...field} />
+                            <Globe className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-5 h-5" />
+                            <Input placeholder="https://example.com" className="pl-10" {...field} />
                           </div>
                         </FormControl>
                         <FormMessage />
@@ -259,19 +352,7 @@ export function ProfileForm() {
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={form.control}
-                  name="company_website"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Website</FormLabel>
-                      <FormControl>
-                        <Input placeholder="https://www.example.com" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                {/* company_website moved to General Info */}
                 
                 <div className="border-t pt-6 mt-6">
                   <h3 className="text-lg font-semibold mb-4">Primary Contact Person</h3>

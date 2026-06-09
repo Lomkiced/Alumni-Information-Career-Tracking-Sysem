@@ -1,7 +1,7 @@
 "use client";
 // app/(dashboard)/admin/employers/page.tsx
 import { useState, useEffect, useCallback } from "react";
-import { Building2, Search, CheckCircle2, XCircle } from "lucide-react";
+import { Building2, Search, CheckCircle2, XCircle, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { PageHeader } from "@/components/shared/PageHeader";
@@ -70,6 +70,22 @@ export default function AdminEmployersPage() {
     setActionType(null);
   };
 
+  const handleDelete = async (id: string, name: string) => {
+    if (!window.confirm(`Are you sure you want to permanently delete employer: ${name}? This action cannot be undone.`)) return;
+
+    setEmployers(prev => prev.filter(e => e.id !== id));
+
+    try {
+      const res = await fetch(`/api/admin/employers/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Failed to delete");
+      toast.success("Employer deleted successfully");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to delete employer");
+      fetchEmployers(); // restore
+    }
+  };
+
   const counts = {
     all: employers.length,
     pending: employers.filter(e => e.approval_status === "pending").length,
@@ -120,7 +136,7 @@ export default function AdminEmployersPage() {
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground hidden sm:table-cell">Industry</th>
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground">Status</th>
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground hidden lg:table-cell">Registered</th>
-                <th className="px-4 py-3" />
+                <th className="text-right px-4 py-3 font-medium text-muted-foreground">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -139,29 +155,42 @@ export default function AdminEmployersPage() {
                   <td className="px-4 py-3 text-muted-foreground hidden lg:table-cell">
                     {format(new Date(emp.created_at), "MMM d, yyyy")}
                   </td>
-                  <td className="px-4 py-3">
-                    {emp.approval_status === "pending" && (
-                      <div className="flex items-center gap-2">
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="h-8 text-emerald-500 hover:bg-emerald-500/10"
-                          onClick={() => { setActionId(emp.id); setActionType("approve"); }}
-                        >
-                          <CheckCircle2 size={14} className="mr-1" /> Approve
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="h-8 text-destructive hover:bg-destructive/10"
-                          onClick={() => { setActionId(emp.id); setActionType("reject"); }}
-                        >
-                          <XCircle size={14} className="mr-1" /> Reject
-                        </Button>
-                      </div>
-                    )}
+                  <td className="px-4 py-3 text-right">
+                    <div className="flex items-center justify-end gap-2">
+                      {emp.approval_status === "pending" && (
+                        <>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-8 text-emerald-500 hover:bg-emerald-500/10 px-2"
+                            onClick={() => { setActionId(emp.id); setActionType("approve"); }}
+                            title="Approve"
+                          >
+                            <CheckCircle2 size={16} />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-8 text-amber-500 hover:bg-amber-500/10 px-2"
+                            onClick={() => { setActionId(emp.id); setActionType("reject"); }}
+                            title="Reject"
+                          >
+                            <XCircle size={16} />
+                          </Button>
+                        </>
+                      )}
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 shrink-0"
+                        onClick={() => handleDelete(emp.id, emp.company_name)}
+                        title="Delete Employer"
+                      >
+                        <Trash2 size={16} />
+                      </Button>
+                    </div>
                     {emp.approval_status === "rejected" && emp.rejection_reason && (
-                      <p className="text-xs text-muted-foreground max-w-xs truncate" title={emp.rejection_reason}>
+                      <p className="text-xs text-muted-foreground max-w-xs truncate mt-1 text-right" title={emp.rejection_reason}>
                         Reason: {emp.rejection_reason}
                       </p>
                     )}

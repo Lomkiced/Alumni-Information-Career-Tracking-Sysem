@@ -51,8 +51,17 @@ export function CareerRecordDialog({ open, onClose, onSave, editData }: CareerRe
     resolver: zodResolver(careerRecordSchema) as any,
     defaultValues: {
       employment_status: "employed",
+      employer_name: "",
+      job_title: "",
+      industry: "",
+      employment_type: undefined,
+      salary_range: undefined,
+      start_date: "",
+      end_date: "",
       is_current: true,
       country: "Philippines",
+      city: "",
+      job_description: "",
     },
   });
 
@@ -77,7 +86,20 @@ export function CareerRecordDialog({ open, onClose, onSave, editData }: CareerRe
         job_description: editData.job_description ?? "",
       });
     } else {
-      form.reset({ employment_status: "employed", is_current: true, country: "Philippines" });
+      form.reset({ 
+        employment_status: "employed", 
+        employer_name: "",
+        job_title: "",
+        industry: "",
+        employment_type: undefined,
+        salary_range: undefined,
+        start_date: "",
+        end_date: "",
+        is_current: true, 
+        country: "Philippines",
+        city: "",
+        job_description: "",
+      });
     }
   }, [editData, open, form]);
 

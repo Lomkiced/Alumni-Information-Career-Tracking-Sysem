@@ -1,8 +1,5 @@
 // lib/email/send.ts
-import { Resend } from "resend";
-
-const resend = new Resend(process.env.RESEND_API_KEY);
-const FROM_EMAIL = process.env.RESEND_FROM_EMAIL ?? "AICTS <noreply@pclu.edu.ph>";
+import { transporter, FROM_EMAIL } from "./nodemailer";
 
 export async function sendEmail({
   to,
@@ -14,17 +11,13 @@ export async function sendEmail({
   html: string;
 }) {
   try {
-    const { data, error } = await resend.emails.send({
+    const info = await transporter.sendMail({
       from: FROM_EMAIL,
-      to: Array.isArray(to) ? to : [to],
+      to: Array.isArray(to) ? to.join(", ") : to,
       subject,
       html,
     });
-    if (error) {
-      console.error("Resend error:", error);
-      return { success: false, error };
-    }
-    return { success: true, data };
+    return { success: true, data: info };
   } catch (err) {
     console.error("Email send failed:", err);
     return { success: false, error: err };
