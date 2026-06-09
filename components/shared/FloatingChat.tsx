@@ -263,7 +263,7 @@ export function FloatingChat() {
       </div>
 
       {/* Body */}
-      <ScrollArea className="flex-1 min-h-0 p-4 bg-muted/10">
+      <div className="flex-1 min-h-0 overflow-y-auto p-4 bg-muted/10 relative">
             {loading ? (
               <div className="flex justify-center items-center h-full">
                 <Loader2 className="animate-spin text-primary opacity-50" />
@@ -273,7 +273,7 @@ export function FloatingChat() {
                 Send a message to start chatting!
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-4 pb-2">
                 {messages.map((msg, idx) => {
                   const isMe = msg.sender_id === profile?.id;
                   const showAvatar = !isMe && (idx === 0 || messages[idx - 1].sender_id !== msg.sender_id);
@@ -339,7 +339,7 @@ export function FloatingChat() {
                 <div ref={scrollRef} />
               </div>
             )}
-          </ScrollArea>
+          </div>
 
           {/* Input */}
           <div className="p-3 border-t border-border bg-card shrink-0 z-10">
