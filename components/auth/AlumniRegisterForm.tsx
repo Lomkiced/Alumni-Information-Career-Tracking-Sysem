@@ -3,15 +3,28 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff, Loader2, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
-import { alumniRegisterSchema, type AlumniRegisterInput } from "@/lib/validations/auth.schema";
+import { alumniRegisterSchema } from "@/lib/validations/auth.schema";
 import { PCLU_COURSES, BATCH_YEARS, GRADUATION_YEARS } from "@/lib/constants/courses";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+const clientSchema = alumniRegisterSchema.superRefine((data, ctx) => {
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(data.email)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Please enter a valid email address (e.g. name@gmail.com)",
+      path: ["email"],
+    });
+  }
+});
+
+type ClientInput = z.infer<typeof clientSchema>;
 
 export function AlumniRegisterForm() {
   const router = useRouter();
@@ -19,13 +32,14 @@ export function AlumniRegisterForm() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [emailWarning, setEmailWarning] = useState<string | null>(null);
 
-  const form = useForm<AlumniRegisterInput>({
-    resolver: zodResolver(alumniRegisterSchema) as any,
+  const form = useForm<ClientInput>({
+    resolver: zodResolver(clientSchema) as any,
     defaultValues: { full_name: "", email: "", password: "", confirm_password: "", student_id: "", course: undefined, batch_year: "", graduation_year: "" } as any,
   });
 
-  const onSubmit = async (data: AlumniRegisterInput) => {
+  const onSubmit = async (data: ClientInput) => {
     setError(null);
     const res = await fetch("/api/auth/register/alumni", {
       method: "POST",
@@ -80,8 +94,76 @@ export function AlumniRegisterForm() {
           <FormField control={control} name="email" render={({ field }) => (
             <FormItem className="sm:col-span-2">
               <FormLabel className={labelCls}>Email Address *</FormLabel>
-              <FormControl><Input {...field} id="alumni-email" type="email" placeholder="juan@email.com" className={inputCls} /></FormControl>
+              <FormControl>
+                <Input
+                  {...field}
+                  id="alumni-email"
+                  type="email"
+                  placeholder="juan@email.com"
+                  className={`${inputCls} ${emailWarning ? "!border-red-500 !focus:border-red-500 focus-visible:ring-2 focus-visible:ring-red-500/50" : ""}`}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    const val = e.target.value;
+                    if (val && val.includes('@')) {
+                      const parts = val.split('@');
+                      const domain = parts[1];
+                      const typos: Record<string, string> = {
+                        'gmai.com': 'gmail.com',
+                        'gamil.com': 'gmail.com',
+                        'gmial.com': 'gmail.com',
+                        'yahooo.com': 'yahoo.com',
+                        'yaho.com': 'yahoo.com',
+                        'hotmial.com': 'hotmail.com',
+                        'hotmali.com': 'hotmail.com',
+                        'outlok.com': 'outlook.com',
+                      };
+                      if (domain && typos[domain.toLowerCase()]) {
+                        setEmailWarning(`Invalid email domain. Did you mean @${typos[domain.toLowerCase()]}? Please fix your email before continuing.`);
+                      } else {
+                        setEmailWarning(null);
+                      }
+                    } else {
+                      setEmailWarning(null);
+                    }
+                  }}
+                  onBlur={async (e) => {
+                    field.onBlur();
+                    const isValid = await form.trigger("email");
+                    if (!isValid) {
+                      setEmailWarning(null);
+                      return;
+                    }
+                    const val = e.target.value;
+                    if (val && val.includes('@')) {
+                      const parts = val.split('@');
+                      const domain = parts[1];
+                      const typos: Record<string, string> = {
+                        'gmai.com': 'gmail.com',
+                        'gamil.com': 'gmail.com',
+                        'gmial.com': 'gmail.com',
+                        'yahooo.com': 'yahoo.com',
+                        'yaho.com': 'yahoo.com',
+                        'hotmial.com': 'hotmail.com',
+                        'hotmali.com': 'hotmail.com',
+                        'outlok.com': 'outlook.com',
+                      };
+                      if (domain && typos[domain.toLowerCase()]) {
+                        setEmailWarning(`Invalid email domain. Did you mean @${typos[domain.toLowerCase()]}? Please fix your email before continuing.`);
+                      } else {
+                        setEmailWarning(null);
+                      }
+                    } else {
+                      setEmailWarning(null);
+                    }
+                  }}
+                />
+              </FormControl>
               <FormMessage className="text-red-300 text-xs" />
+              {emailWarning && (
+                <p className="text-red-400 text-xs mt-1 bg-red-400/10 border border-red-400/20 p-2 rounded">
+                  {emailWarning}
+                </p>
+              )}
             </FormItem>
           )} />
           <FormField control={control} name="password" render={({ field }) => (
@@ -160,7 +242,7 @@ export function AlumniRegisterForm() {
 
         </div>
 
-        <Button id="alumni-register-submit" type="submit" disabled={form.formState.isSubmitting} className="w-full h-11 bg-gradient-to-r from-pclu-sky-600 to-pclu-sky-500 hover:from-pclu-sky-500 hover:to-pclu-sky-400 text-white font-semibold shadow-lg">
+        <Button id="alumni-register-submit" type="submit" disabled={form.formState.isSubmitting || !!emailWarning} className="w-full h-11 bg-gradient-to-r from-pclu-sky-600 to-pclu-sky-500 hover:from-pclu-sky-500 hover:to-pclu-sky-400 text-white font-semibold shadow-lg">
           {form.formState.isSubmitting ? <><Loader2 size={16} className="animate-spin mr-2" />Creating Account...</> : "Create Alumni Account"}
         </Button>
       </form>

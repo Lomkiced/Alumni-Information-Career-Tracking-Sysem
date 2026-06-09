@@ -50,7 +50,7 @@ export function Navbar({ title }: NavbarProps) {
         <div className="flex-1 flex justify-end items-center gap-3">
           <NotificationBell userId={profile?.id} />
           <Avatar className="h-10 w-10 ring-2 ring-primary/20 cursor-pointer hover:ring-primary/40 transition-all">
-            <AvatarImage src={profile?.profile_photo_url ?? ""} alt={profile?.full_name ?? ""} />
+            <AvatarImage src={profile?.profile_photo_url || undefined} alt={profile?.full_name || undefined} />
             <AvatarFallback className="bg-primary text-primary-foreground text-sm font-semibold">
               {formatInitials(profile?.full_name)}
             </AvatarFallback>

@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { User, Camera, Loader2, Save, Globe, Phone, MapPin, Link2, Eye, EyeOff, GraduationCap } from "lucide-react";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { alumniProfileSchema, type AlumniProfileInput } from "@/lib/validations/alumni.schema";
 import { PCLU_COURSES } from "@/lib/constants/courses";
@@ -18,7 +19,7 @@ import { formatInitials } from "@/lib/utils/format";
 
 interface ProfileData {
   id: string; full_name: string; email: string; phone?: string;
-  profile_photo_url?: string; is_verified: boolean;
+  profile_photo_url?: string; cover_photo_url?: string; is_verified: boolean;
   student_id?: string; course?: string; major?: string;
   batch_year?: number; graduation_year?: number;
   address?: string; city?: string; province?: string;
@@ -28,10 +29,13 @@ interface ProfileData {
 
 export default function AlumniProfilePage() {
   const supabase = createClient();
+  const router = useRouter();
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const [uploadingCover, setUploadingCover] = useState(false);
+  const coverRef = useRef<HTMLInputElement>(null);
   const [uploadingResume, setUploadingResume] = useState(false);
   const resumeRef = useRef<HTMLInputElement>(null);
 
@@ -80,13 +84,42 @@ export default function AlumniProfilePage() {
       if (uploadErr) throw uploadErr;
 
       const { data: { publicUrl } } = supabase.storage.from("avatars").getPublicUrl(path);
-      await (supabase as any).from("profiles").update({ profile_photo_url: publicUrl }).eq("id", user!.id);
-      setProfile(prev => prev ? { ...prev, profile_photo_url: publicUrl } : prev);
+      const freshUrl = `${publicUrl}?t=${Date.now()}`;
+      await (supabase as any).from("profiles").update({ profile_photo_url: freshUrl }).eq("id", user!.id);
+      setProfile(prev => prev ? { ...prev, profile_photo_url: freshUrl } : prev);
       toast.success("Photo updated!");
+      router.refresh();
     } catch {
       toast.error("Upload failed. Please try again.");
     } finally {
       setUploading(false);
+    }
+  };
+
+  const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { toast.error("File must be under 5MB"); return; }
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) { toast.error("Only JPG, PNG, WebP allowed"); return; }
+
+    setUploadingCover(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      const ext = file.name.split(".").pop();
+      const path = `avatars/${user!.id}/cover.${ext}`;
+      const { error: uploadErr } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
+      if (uploadErr) throw uploadErr;
+
+      const { data: { publicUrl } } = supabase.storage.from("avatars").getPublicUrl(path);
+      const freshUrl = `${publicUrl}?t=${Date.now()}`;
+      await (supabase as any).from("profiles").update({ cover_photo_url: freshUrl }).eq("id", user!.id);
+      setProfile(prev => prev ? { ...prev, cover_photo_url: freshUrl } : prev);
+      toast.success("Cover photo updated!");
+      router.refresh();
+    } catch {
+      toast.error("Cover upload failed. Please try again.");
+    } finally {
+      setUploadingCover(false);
     }
   };
 
@@ -183,10 +216,26 @@ export default function AlumniProfilePage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Photo Card */}
-        <div className="rounded-xl border border-border bg-card p-6 flex flex-col items-center gap-4">
-          <div className="relative">
+        <div className="rounded-xl border border-border bg-card p-0 flex flex-col items-center overflow-hidden h-fit">
+          {/* Cover Photo */}
+          <div className="w-full h-64 sm:h-80 bg-gradient-to-r from-primary/20 via-primary/10 to-transparent relative group">
+            {profile?.cover_photo_url && (
+              <img src={profile.cover_photo_url} alt="Cover" className="w-full h-full object-cover object-[center_25%]" />
+            )}
+            <button
+              onClick={() => coverRef.current?.click()}
+              disabled={uploadingCover}
+              className="absolute inset-0 bg-black/40 text-white opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 text-sm font-medium backdrop-blur-[2px]"
+            >
+              {uploadingCover ? <><Loader2 size={16} className="animate-spin" /> Uploading...</> : <><Camera size={16} /> Edit Cover Photo</>}
+            </button>
+            <input ref={coverRef} type="file" accept="image/*" className="hidden" onChange={handleCoverUpload} />
+          </div>
+
+          <div className="px-6 pb-6 -mt-12 flex flex-col items-center w-full gap-4">
+            <div className="relative">
             <Avatar className="h-24 w-24 ring-4 ring-border">
-              <AvatarImage src={profile?.profile_photo_url ?? ""} alt={profile?.full_name} />
+              <AvatarImage src={profile?.profile_photo_url || undefined} alt={profile?.full_name} />
               <AvatarFallback className="text-2xl font-bold bg-primary text-primary-foreground">
                 {formatInitials(profile?.full_name)}
               </AvatarFallback>
@@ -262,6 +311,7 @@ export default function AlumniProfilePage() {
                 </div>
               )}
             </div>
+          </div>
           </div>
         </div>
 

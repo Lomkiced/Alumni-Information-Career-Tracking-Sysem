@@ -136,7 +136,7 @@ export function Sidebar({ onClose }: SidebarProps) {
       <div className="px-3 py-4 border-t border-sidebar-border space-y-2">
         <div className="flex items-center gap-3 px-2 py-2 rounded-lg">
           <Avatar className="h-10 w-10 ring-2 ring-sidebar-primary/40">
-            <AvatarImage src={profile?.profile_photo_url ?? ""} alt={profile?.full_name ?? ""} />
+            <AvatarImage src={profile?.profile_photo_url || undefined} alt={profile?.full_name || undefined} />
             <AvatarFallback className="bg-sidebar-primary text-sidebar-primary-foreground text-sm font-semibold">
               {formatInitials(profile?.full_name)}
             </AvatarFallback>

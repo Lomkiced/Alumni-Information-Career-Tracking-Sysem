@@ -1,13 +1,13 @@
 "use client";
 // app/(dashboard)/admin/employers/page.tsx
 import { useState, useEffect, useCallback } from "react";
-import { Building2, Search, CheckCircle2, XCircle, Trash2 } from "lucide-react";
+import { Building2, Search, Eye } from "lucide-react";
+import Link from "next/link";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { EmptyState } from "@/components/shared/EmptyState";
-import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { createAdminClient } from "@/lib/supabase/server";
@@ -32,11 +32,6 @@ export default function AdminEmployersPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [tab, setTab] = useState<typeof FILTER_TABS[number]>("all");
-  const [actionId, setActionId] = useState<string | null>(null);
-  const [actionType, setActionType] = useState<"approve" | "reject" | null>(null);
-  
-  const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [deleteName, setDeleteName] = useState<string | null>(null);
 
   const fetchEmployers = useCallback(async () => {
     setLoading(true);
@@ -57,45 +52,6 @@ export default function AdminEmployersPage() {
     );
     setFiltered(result);
   }, [employers, tab, search]);
-
-  const handleAction = async (reason?: string) => {
-    if (!actionId || !actionType) return;
-    const res = await fetch(`/api/admin/employers/${actionId}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: actionType, rejection_reason: reason }),
-    });
-    const json = await res.json();
-    if (!res.ok) { toast.error(json.error ?? "Action failed"); return; }
-    toast.success(actionType === "approve" ? "Employer approved!" : "Employer rejected");
-    await fetchEmployers();
-    setActionId(null);
-    setActionType(null);
-  };
-
-  const confirmDelete = (id: string, name: string) => {
-    setDeleteId(id);
-    setDeleteName(name || "Unknown");
-  };
-
-  const handleDelete = async () => {
-    if (!deleteId) return;
-
-    setEmployers(prev => prev.filter(e => e.id !== deleteId));
-
-    try {
-      const res = await fetch(`/api/admin/employers/${deleteId}`, { method: "DELETE" });
-      if (!res.ok) throw new Error("Failed to delete");
-      toast.success("Employer deleted successfully");
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to delete employer");
-      fetchEmployers(); // restore
-    } finally {
-      setDeleteId(null);
-      setDeleteName(null);
-    }
-  };
 
   const counts = {
     all: employers.length,
@@ -168,43 +124,17 @@ export default function AdminEmployersPage() {
                   </td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center justify-end gap-2">
-                      {emp.approval_status === "pending" && (
-                        <>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="h-8 text-emerald-500 hover:bg-emerald-500/10 px-2"
-                            onClick={() => { setActionId(emp.id); setActionType("approve"); }}
-                            title="Approve"
-                          >
-                            <CheckCircle2 size={16} />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="h-8 text-amber-500 hover:bg-amber-500/10 px-2"
-                            onClick={() => { setActionId(emp.id); setActionType("reject"); }}
-                            title="Reject"
-                          >
-                            <XCircle size={16} />
-                          </Button>
-                        </>
-                      )}
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 shrink-0"
-                        onClick={() => confirmDelete(emp.id, emp.company_name)}
-                        title="Delete Employer"
-                      >
-                        <Trash2 size={16} />
-                      </Button>
+                      <Link href={`/admin/employers/${emp.id}`}>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10 shrink-0"
+                          title="Review Employer"
+                        >
+                          <Eye size={16} />
+                        </Button>
+                      </Link>
                     </div>
-                    {emp.approval_status === "rejected" && emp.rejection_reason && (
-                      <p className="text-xs text-muted-foreground max-w-xs truncate mt-1 text-right" title={emp.rejection_reason}>
-                        Reason: {emp.rejection_reason}
-                      </p>
-                    )}
                   </td>
                 </tr>
               ))}
@@ -212,40 +142,6 @@ export default function AdminEmployersPage() {
           </table>
         </div>
       )}
-
-      <ConfirmDialog
-        open={!!actionId && actionType === "approve"}
-        onClose={() => { setActionId(null); setActionType(null); }}
-        onConfirm={handleAction}
-        title="Approve Employer"
-        description="This will approve the employer account and notify them via in-app notification."
-        confirmLabel="Approve"
-        confirmVariant="default"
-      />
-      <ConfirmDialog
-        open={!!actionId && actionType === "reject"}
-        onClose={() => { setActionId(null); setActionType(null); }}
-        onConfirm={handleAction}
-        title="Reject Employer"
-        description="Please provide a reason. The employer will be notified."
-        confirmLabel="Reject"
-        confirmVariant="destructive"
-        requireReason
-        reasonLabel="Rejection Reason"
-        reasonPlaceholder="Why is this registration being rejected? (Will be emailed to the user)"
-      />
-      <ConfirmDialog
-        open={!!deleteId}
-        onClose={() => {
-          setDeleteId(null);
-          setDeleteName(null);
-        }}
-        onConfirm={handleDelete}
-        title="Delete Employer"
-        description={`Are you sure you want to permanently delete employer: ${deleteName}? This action cannot be undone.`}
-        confirmLabel="Delete Employer"
-        confirmVariant="destructive"
-      />
     </div>
   );
 }
