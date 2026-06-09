@@ -234,7 +234,7 @@ export function FloatingChat() {
     <div className="fixed bottom-4 right-4 z-50 flex flex-col bg-card border border-border shadow-2xl rounded-t-xl rounded-b-md overflow-hidden transition-all duration-300 ease-in-out h-[450px] w-80 sm:w-96">
       {/* Header */}
       <div 
-        className="bg-primary text-primary-foreground p-3 flex items-center justify-between cursor-pointer"
+        className="bg-primary text-primary-foreground p-3 flex items-center justify-between cursor-pointer shrink-0 z-10"
         onClick={() => setIsMinimized(true)}
       >
         <div className="flex items-center gap-2 overflow-hidden">
@@ -263,7 +263,7 @@ export function FloatingChat() {
       </div>
 
       {/* Body */}
-      <ScrollArea className="flex-1 p-4 bg-muted/10">
+      <ScrollArea className="flex-1 min-h-0 p-4 bg-muted/10">
             {loading ? (
               <div className="flex justify-center items-center h-full">
                 <Loader2 className="animate-spin text-primary opacity-50" />
@@ -342,7 +342,7 @@ export function FloatingChat() {
           </ScrollArea>
 
           {/* Input */}
-          <div className="p-3 border-t border-border bg-card">
+          <div className="p-3 border-t border-border bg-card shrink-0 z-10">
             <form onSubmit={handleSend} className="flex items-center gap-2">
               <Input
                 placeholder="Type a message..."
