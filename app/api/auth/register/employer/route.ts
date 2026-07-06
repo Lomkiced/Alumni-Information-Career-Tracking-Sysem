@@ -48,8 +48,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Failed to create employer record" }, { status: 500 });
     }
 
-    transporter.sendMail({ from: FROM_EMAIL, to: email, subject: "AICTS — Employer Registration Received", html: welcomeEmployerHtml({ full_name, company_name }) })
-      .catch((e: any) => console.error("[Nodemailer] Failed to send email. Check your SMTP_EMAIL and SMTP_PASSWORD. Error:", e.message));
+    try {
+      await transporter.sendMail({ from: FROM_EMAIL, to: email, subject: "AICTS — Employer Registration Received", html: welcomeEmployerHtml({ full_name, company_name }) });
+    } catch (e: any) {
+      console.error("[Nodemailer] Failed to send email. Check your SMTP_EMAIL and SMTP_PASSWORD. Error:", e.message);
+    }
 
     await logAudit({ userId, action: AUDIT_ACTIONS.CREATE_EMPLOYER, tableName: "employers", recordId: userId, newValues: { company_name, industry } });
 
