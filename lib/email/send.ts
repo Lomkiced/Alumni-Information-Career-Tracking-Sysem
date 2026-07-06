@@ -1,5 +1,4 @@
-// lib/email/send.ts
-import { transporter, FROM_EMAIL } from "./nodemailer";
+import { sendMailWithBrevo } from "./brevo";
 
 export async function sendEmail({
   to,
@@ -11,13 +10,17 @@ export async function sendEmail({
   html: string;
 }) {
   try {
-    const info = await transporter.sendMail({
-      from: FROM_EMAIL,
-      to: Array.isArray(to) ? to.join(", ") : to,
-      subject,
-      html,
-    });
-    return { success: true, data: info };
+    const toArray = Array.isArray(to) ? to : [to];
+    const results = [];
+    for (const email of toArray) {
+       const info = await sendMailWithBrevo({
+         to: email,
+         subject,
+         html,
+       });
+       results.push(info);
+    }
+    return { success: true, data: results };
   } catch (err) {
     console.error("Email send failed:", err);
     return { success: false, error: err };
