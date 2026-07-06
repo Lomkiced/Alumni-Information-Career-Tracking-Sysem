@@ -51,7 +51,12 @@ export async function POST(request: Request) {
     try {
       await transporter.sendMail({ from: FROM_EMAIL, to: email, subject: "AICTS — Employer Registration Received", html: welcomeEmployerHtml({ full_name, company_name }) });
     } catch (e: any) {
-      console.error("[Nodemailer] Failed to send email. Check your SMTP_EMAIL and SMTP_PASSWORD. Error:", e.message);
+      console.error("[Nodemailer] Failed to send email:", e.message);
+      // ROLLBACK: Safely delete related records then delete the user so they can try again.
+      await (adminClient as any).from("employers").delete().eq("id", userId);
+      await (adminClient as any).from("profiles").delete().eq("id", userId);
+      await adminClient.auth.admin.deleteUser(userId);
+      return NextResponse.json({ error: "Registration partially succeeded, but we could not send the confirmation email. Please try registering again. If the issue persists, contact support." }, { status: 500 });
     }
 
     await logAudit({ userId, action: AUDIT_ACTIONS.CREATE_EMPLOYER, tableName: "employers", recordId: userId, newValues: { company_name, industry } });

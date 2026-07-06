@@ -53,24 +53,27 @@ export async function POST(request: Request) {
     try {
       const { data: linkData, error: linkErr } = await adminClient.auth.admin.generateLink({ type: "signup", email, password });
       if (linkErr) {
-        console.error("[Auth] generateLink error:", linkErr);
-      } else {
-        const action_link = linkData?.properties?.action_link;
-        if (action_link) {
-          try {
-            await transporter.sendMail({
-              from: FROM_EMAIL,
-              to: email,
-              subject: "Welcome to AICTS — Verify Your Email",
-              html: welcomeAlumniHtml({ full_name, email, action_link }),
-            });
-          } catch (e: any) {
-            console.error("[Nodemailer] Failed to send email. Check your SMTP_EMAIL and SMTP_PASSWORD. Error:", e.message);
-          }
-        }
+        throw new Error("Failed to generate verification link: " + linkErr.message);
       }
+      
+      const action_link = linkData?.properties?.action_link;
+      if (!action_link) {
+        throw new Error("Missing action_link in generated link data");
+      }
+
+      await transporter.sendMail({
+        from: FROM_EMAIL,
+        to: email,
+        subject: "Welcome to AICTS — Verify Your Email",
+        html: welcomeAlumniHtml({ full_name, email, action_link }),
+      });
     } catch (e: any) {
-      console.error("[Auth/Resend Pipeline]", e);
+      console.error("[Auth/Resend Pipeline] Email sending failed:", e);
+      // ROLLBACK: Safely delete related records then delete the user so they can try again.
+      await (adminClient as any).from("alumni").delete().eq("id", userId);
+      await (adminClient as any).from("profiles").delete().eq("id", userId);
+      await adminClient.auth.admin.deleteUser(userId);
+      return NextResponse.json({ error: "Registration partially succeeded, but we could not send the confirmation email. Please try registering again. If the issue persists, contact support." }, { status: 500 });
     }
 
     // 5. Audit
