@@ -2,7 +2,7 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
 import { alumniRegisterSchema } from "@/lib/validations/auth.schema";
-import { transporter, FROM_EMAIL } from "@/lib/email/nodemailer";
+import { sendMailWithBrevo } from "@/lib/email/brevo";
 import { welcomeAlumniHtml } from "@/lib/email/templates/welcome-alumni";
 import { logAudit, AUDIT_ACTIONS } from "@/lib/utils/audit";
 
@@ -61,8 +61,7 @@ export async function POST(request: Request) {
         throw new Error("Missing action_link in generated link data");
       }
 
-      await transporter.sendMail({
-        from: FROM_EMAIL,
+      await sendMailWithBrevo({
         to: email,
         subject: "Welcome to AICTS — Verify Your Email",
         html: welcomeAlumniHtml({ full_name, email, action_link }),

@@ -2,7 +2,7 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
 import { employerRegisterSchema } from "@/lib/validations/auth.schema";
-import { transporter, FROM_EMAIL } from "@/lib/email/nodemailer";
+import { sendMailWithBrevo } from "@/lib/email/brevo";
 import { welcomeEmployerHtml } from "@/lib/email/templates/welcome-employer";
 import { logAudit, AUDIT_ACTIONS } from "@/lib/utils/audit";
 
@@ -49,9 +49,13 @@ export async function POST(request: Request) {
     }
 
     try {
-      await transporter.sendMail({ from: FROM_EMAIL, to: email, subject: "AICTS — Employer Registration Received", html: welcomeEmployerHtml({ full_name, company_name }) });
+      await sendMailWithBrevo({
+        to: email,
+        subject: "AICTS — Employer Registration Received",
+        html: welcomeEmployerHtml({ full_name, company_name })
+      });
     } catch (e: any) {
-      console.error("[Nodemailer] Failed to send email:", e.message);
+      console.error("[Brevo] Failed to send email:", e.message);
       // ROLLBACK: Safely delete related records then delete the user so they can try again.
       await (adminClient as any).from("employers").delete().eq("id", userId);
       await (adminClient as any).from("profiles").delete().eq("id", userId);
