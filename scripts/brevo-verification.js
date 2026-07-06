@@ -42,11 +42,11 @@ async function resendVerification(email) {
           { email: email }
         ],
         subject: "AICTS — Verify Your Email (Resend)",
-        htmlContent: \`
+        htmlContent: `
           <h2>Verify Your Email</h2>
           <p>Please click the link below to verify your email address:</p>
-          <a href="\${action_link}">Verify Email Address</a>
-        \`,
+          <a href="${action_link}">Verify Email Address</a>
+        `,
       }),
     });
 

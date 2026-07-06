@@ -39,7 +39,7 @@ export async function sendMailWithBrevo({
   const data = await response.json();
 
   if (!response.ok) {
-    throw new Error(\`Brevo Error: \${data.message || response.statusText}\`);
+    throw new Error(`Brevo Error: ${data.message || response.statusText}`);
   }
 
   return data;
