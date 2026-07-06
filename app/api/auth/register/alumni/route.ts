@@ -51,7 +51,16 @@ export async function POST(request: Request) {
 
     // 4. Generate verification link and send welcome email
     try {
-      const { data: linkData, error: linkErr } = await adminClient.auth.admin.generateLink({ type: "signup", email, password });
+      const origin = request.headers.get("origin") || (request.headers.get("x-forwarded-host") ? `https://${request.headers.get("x-forwarded-host")}` : "http://localhost:3000");
+
+      const { data: linkData, error: linkErr } = await adminClient.auth.admin.generateLink({ 
+        type: "signup", 
+        email, 
+        password,
+        options: {
+          redirectTo: `${origin}/api/auth/callback`
+        }
+      });
       if (linkErr) {
         throw new Error("Failed to generate verification link: " + linkErr.message);
       }
