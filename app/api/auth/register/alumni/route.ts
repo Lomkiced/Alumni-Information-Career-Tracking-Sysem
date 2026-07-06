@@ -49,28 +49,29 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Failed to create alumni record" }, { status: 500 });
     }
 
-    // 4. Generate verification link and send welcome email (non-blocking)
-    adminClient.auth.admin.generateLink({ type: "signup", email, password })
-      .then(async ({ data: linkData, error: linkErr }) => {
-        if (linkErr) {
-          console.error("[Auth] generateLink error:", linkErr);
-          return;
-        }
+    // 4. Generate verification link and send welcome email
+    try {
+      const { data: linkData, error: linkErr } = await adminClient.auth.admin.generateLink({ type: "signup", email, password });
+      if (linkErr) {
+        console.error("[Auth] generateLink error:", linkErr);
+      } else {
         const action_link = linkData?.properties?.action_link;
-        if (!action_link) return;
-
-        try {
-          await transporter.sendMail({
-            from: FROM_EMAIL,
-            to: email,
-            subject: "Welcome to AICTS — Verify Your Email",
-            html: welcomeAlumniHtml({ full_name, email, action_link }),
-          });
-        } catch (e: any) {
-          console.error("[Nodemailer] Failed to send email. Check your SMTP_EMAIL and SMTP_PASSWORD. Error:", e.message);
+        if (action_link) {
+          try {
+            await transporter.sendMail({
+              from: FROM_EMAIL,
+              to: email,
+              subject: "Welcome to AICTS — Verify Your Email",
+              html: welcomeAlumniHtml({ full_name, email, action_link }),
+            });
+          } catch (e: any) {
+            console.error("[Nodemailer] Failed to send email. Check your SMTP_EMAIL and SMTP_PASSWORD. Error:", e.message);
+          }
         }
-      })
-      .catch((e) => console.error("[Auth/Resend Pipeline]", e));
+      }
+    } catch (e: any) {
+      console.error("[Auth/Resend Pipeline]", e);
+    }
 
     // 5. Audit
     await logAudit({ userId, action: AUDIT_ACTIONS.CREATE_ALUMNI, tableName: "alumni", recordId: userId, newValues: { email, course, batch_year } });
