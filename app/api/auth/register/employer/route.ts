@@ -1,8 +1,8 @@
 // app/api/auth/register/employer/route.ts
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
-import { employerRegisterSchema } from "@/lib/validations/auth.schema";
-import { sendMailWithBrevo } from "@/lib/email/brevo";
+import { prisma } from "@/lib/prisma";
+import { sendEmail } from "@/lib/email/send";
 import { welcomeEmployerHtml } from "@/lib/email/templates/welcome-employer";
 import { logAudit, AUDIT_ACTIONS } from "@/lib/utils/audit";
 
@@ -49,18 +49,28 @@ export async function POST(request: Request) {
     }
 
     try {
-      await sendMailWithBrevo({
+      const emailResult = await sendEmail({
         to: email,
         subject: "AICTS — Employer Registration Received",
         html: welcomeEmployerHtml({ full_name, company_name })
       });
+      
+      if (!emailResult.success) {
+        throw new Error("Email provider rejected the request.");
+      }
     } catch (e: any) {
-      console.error("[Brevo] Failed to send email:", e.message);
-      // ROLLBACK: Safely delete related records then delete the user so they can try again.
-      await (adminClient as any).from("employers").delete().eq("id", userId);
-      await (adminClient as any).from("profiles").delete().eq("id", userId);
-      await adminClient.auth.admin.deleteUser(userId);
-      return NextResponse.json({ error: "Registration partially succeeded, but we could not send the confirmation email. Please try registering again. If the issue persists, contact support." }, { status: 500 });
+      console.error("[Auth/Email Pipeline] Failed to send email:", e);
+      // ROLLBACK: Safely delete related records using Prisma to bypass RLS/FK issues, then delete the auth user.
+      try {
+        await prisma.$transaction([
+          prisma.employer.deleteMany({ where: { id: userId } }),
+          prisma.profile.deleteMany({ where: { id: userId } }),
+        ]);
+        await adminClient.auth.admin.deleteUser(userId);
+      } catch (rollbackErr) {
+        console.error("Rollback failed:", rollbackErr);
+      }
+      return NextResponse.json({ error: "Registration partially succeeded, but we could not send the confirmation email. Please check your email address and try registering again." }, { status: 500 });
     }
 
     await logAudit({ userId, action: AUDIT_ACTIONS.CREATE_EMPLOYER, tableName: "employers", recordId: userId, newValues: { company_name, industry } });

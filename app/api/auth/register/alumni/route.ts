@@ -1,8 +1,8 @@
 // app/api/auth/register/alumni/route.ts
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
-import { alumniRegisterSchema } from "@/lib/validations/auth.schema";
-import { sendMailWithBrevo } from "@/lib/email/brevo";
+import { prisma } from "@/lib/prisma";
+import { sendEmail } from "@/lib/email/send";
 import { welcomeAlumniHtml } from "@/lib/email/templates/welcome-alumni";
 import { logAudit, AUDIT_ACTIONS } from "@/lib/utils/audit";
 
@@ -51,7 +51,8 @@ export async function POST(request: Request) {
 
     // 4. Generate verification link and send welcome email
     try {
-      const origin = request.headers.get("origin") || (request.headers.get("x-forwarded-host") ? `https://${request.headers.get("x-forwarded-host")}` : "http://localhost:3000");
+      const requestUrl = new URL(request.url);
+      const origin = process.env.NEXT_PUBLIC_APP_URL || requestUrl.origin;
 
       const { data: linkData, error: linkErr } = await adminClient.auth.admin.generateLink({ 
         type: "signup", 
@@ -70,18 +71,28 @@ export async function POST(request: Request) {
         throw new Error("Missing action_link in generated link data");
       }
 
-      await sendMailWithBrevo({
+      const emailResult = await sendEmail({
         to: email,
         subject: "Welcome to AICTS — Verify Your Email",
         html: welcomeAlumniHtml({ full_name, email, action_link }),
       });
+      
+      if (!emailResult.success) {
+        throw new Error("Email provider rejected the request.");
+      }
     } catch (e: any) {
-      console.error("[Auth/Resend Pipeline] Email sending failed:", e);
-      // ROLLBACK: Safely delete related records then delete the user so they can try again.
-      await (adminClient as any).from("alumni").delete().eq("id", userId);
-      await (adminClient as any).from("profiles").delete().eq("id", userId);
-      await adminClient.auth.admin.deleteUser(userId);
-      return NextResponse.json({ error: "Registration partially succeeded, but we could not send the confirmation email. Please try registering again. If the issue persists, contact support." }, { status: 500 });
+      console.error("[Auth/Email Pipeline] Email sending failed:", e);
+      // ROLLBACK: Safely delete related records using Prisma to bypass RLS/FK issues, then delete the auth user.
+      try {
+        await prisma.$transaction([
+          prisma.alumni.deleteMany({ where: { id: userId } }),
+          prisma.profile.deleteMany({ where: { id: userId } }),
+        ]);
+        await adminClient.auth.admin.deleteUser(userId);
+      } catch (rollbackErr) {
+        console.error("Rollback failed:", rollbackErr);
+      }
+      return NextResponse.json({ error: "Registration partially succeeded, but we could not send the confirmation email. Please check your email address and try registering again." }, { status: 500 });
     }
 
     // 5. Audit

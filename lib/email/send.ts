@@ -1,4 +1,4 @@
-import { sendMailWithBrevo } from "./brevo";
+import { sendMailWithGmail } from "./gmail";
 
 export async function sendEmail({
   to,
@@ -13,7 +13,7 @@ export async function sendEmail({
     const toArray = Array.isArray(to) ? to : [to];
     const results = [];
     for (const email of toArray) {
-       const info = await sendMailWithBrevo({
+       const info = await sendMailWithGmail({
          to: email,
          subject,
          html,
