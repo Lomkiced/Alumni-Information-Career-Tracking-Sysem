@@ -2,6 +2,7 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
+import { alumniRegisterSchema } from "@/lib/validations/auth.schema";
 import { sendEmail } from "@/lib/email/send";
 import { welcomeAlumniHtml } from "@/lib/email/templates/welcome-alumni";
 import { logAudit, AUDIT_ACTIONS } from "@/lib/utils/audit";
