@@ -35,20 +35,24 @@ export async function DELETE(
       newValues: { role: "alumni", deleted: true },
     });
 
-    // 1. Delete from Prisma using raw SQL transaction to ensure all tables are cleared (even those missing from Prisma schema)
-    await prisma.$transaction([
-      prisma.$executeRaw`DELETE FROM comments WHERE user_id = ${id}::uuid`,
-      prisma.$executeRaw`DELETE FROM notifications WHERE user_id = ${id}::uuid`,
-      prisma.$executeRaw`DELETE FROM audit_logs WHERE user_id = ${id}::uuid`,
-      prisma.$executeRaw`DELETE FROM messages WHERE sender_id = ${id}::uuid`,
-      prisma.$executeRaw`DELETE FROM conversations WHERE user1_id = ${id}::uuid OR user2_id = ${id}::uuid`,
-      prisma.$executeRaw`DELETE FROM job_applications WHERE alumni_id = ${id}::uuid`,
-      prisma.$executeRaw`DELETE FROM career_records WHERE alumni_id = ${id}::uuid`,
-      prisma.$executeRaw`DELETE FROM alumni WHERE id = ${id}::uuid`,
-      prisma.$executeRaw`DELETE FROM employers WHERE id = ${id}::uuid`,
-      prisma.$executeRaw`DELETE FROM profiles WHERE id = ${id}::uuid`
-    ]).catch(() => {
-      // Ignored if they don't exist
+    // 1. Delete from Prisma using interactive transaction with Prisma client methods
+    await prisma.$transaction(async (tx) => {
+      // Delete child records explicitly to handle relations safely
+      await tx.auditLog.deleteMany({ where: { user_id: id } });
+      await tx.notification.deleteMany({ where: { user_id: id } });
+      await tx.message.deleteMany({ where: { sender_id: id } });
+      await tx.conversation.deleteMany({
+        where: { OR: [{ user1_id: id }, { user2_id: id }] },
+      });
+      await tx.jobApplication.deleteMany({ where: { alumni_id: id } });
+      await tx.careerRecord.deleteMany({ where: { alumni_id: id } });
+
+      // Delete specific profile types
+      await tx.alumni.deleteMany({ where: { id } });
+      await tx.employer.deleteMany({ where: { id } });
+
+      // Finally, delete the root profile
+      await tx.profile.deleteMany({ where: { id } });
     });
 
     // 2. Delete from Supabase Auth (purges the actual user login)

@@ -137,19 +137,37 @@ export async function DELETE(
       newValues: { role: "employer", deleted: true },
     });
 
-    // 1. Delete from Prisma using raw SQL transaction to ensure all tables are cleared
-    await prisma.$transaction([
-      prisma.$executeRaw`DELETE FROM comments WHERE user_id = ${id}::uuid`,
-      prisma.$executeRaw`DELETE FROM notifications WHERE user_id = ${id}::uuid`,
-      prisma.$executeRaw`DELETE FROM audit_logs WHERE user_id = ${id}::uuid`,
-      prisma.$executeRaw`DELETE FROM messages WHERE sender_id = ${id}::uuid`,
-      prisma.$executeRaw`DELETE FROM conversations WHERE user1_id = ${id}::uuid OR user2_id = ${id}::uuid`,
-      prisma.$executeRaw`DELETE FROM job_applications WHERE job_id IN (SELECT id FROM job_postings WHERE employer_id = ${id}::uuid)`,
-      prisma.$executeRaw`DELETE FROM job_postings WHERE employer_id = ${id}::uuid`,
-      prisma.$executeRaw`DELETE FROM employers WHERE id = ${id}::uuid`,
-      prisma.$executeRaw`DELETE FROM profiles WHERE id = ${id}::uuid`
-    ]).catch(() => {
-      // Ignored if they don't exist
+    // 1. Delete from Prisma using interactive transaction with Prisma client methods
+    await prisma.$transaction(async (tx) => {
+      // Delete child records explicitly to handle relations safely
+      await tx.auditLog.deleteMany({ where: { user_id: id } });
+      await tx.notification.deleteMany({ where: { user_id: id } });
+      await tx.message.deleteMany({ where: { sender_id: id } });
+      await tx.conversation.deleteMany({
+        where: { OR: [{ user1_id: id }, { user2_id: id }] },
+      });
+
+      // Get all job postings for this employer to delete their applications
+      const employerJobs = await tx.jobPosting.findMany({
+        where: { employer_id: id },
+        select: { id: true },
+      });
+      const jobIds = employerJobs.map(j => j.id);
+      
+      if (jobIds.length > 0) {
+        await tx.jobApplication.deleteMany({
+          where: { job_id: { in: jobIds } },
+        });
+      }
+      
+      await tx.jobPosting.deleteMany({ where: { employer_id: id } });
+
+      // Delete specific profile types
+      await tx.alumni.deleteMany({ where: { id } });
+      await tx.employer.deleteMany({ where: { id } });
+
+      // Finally, delete the root profile
+      await tx.profile.deleteMany({ where: { id } });
     });
 
     // 2. Delete from Supabase Auth (purges the actual user login)
