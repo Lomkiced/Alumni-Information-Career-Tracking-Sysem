@@ -1,10 +1,11 @@
 "use client";
 // app/(dashboard)/employer/applicants/page.tsx
 import { useState, useEffect, useCallback } from "react";
-import { UserCheck, Search, ChevronDown } from "lucide-react";
+import { UserCheck, Search, ChevronDown, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { PageHeader } from "@/components/shared/PageHeader";
+import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { Input } from "@/components/ui/input";
@@ -41,6 +42,7 @@ export default function EmployerApplicantsPage() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [updating, setUpdating] = useState<string | null>(null);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const fetchApplicants = useCallback(async () => {
     setLoading(true);
@@ -79,6 +81,25 @@ export default function EmployerApplicantsPage() {
     });
     toast.success("Notes saved");
     setUpdating(null);
+  };
+
+  const handleDelete = async () => {
+    if (!deleteId) return;
+    const id = deleteId;
+    setDeleteId(null);
+    setUpdating(id);
+    
+    try {
+      const res = await fetch(`/api/employer/applicants/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Failed to delete");
+      toast.success("Applicant deleted successfully");
+      setApplications(prev => prev.filter(a => a.id !== id));
+      if (expandedId === id) setExpandedId(null);
+    } catch (err) {
+      toast.error("Failed to delete applicant");
+    } finally {
+      setUpdating(null);
+    }
   };
 
   const filtered = applications.filter(a => {
@@ -183,18 +204,33 @@ export default function EmployerApplicantsPage() {
                     </div>
 
                     {/* Employer Notes */}
-                    <div>
-                      <p className="text-xs font-medium text-muted-foreground mb-1.5">Internal Notes</p>
-                      <Textarea
-                        value={notes[app.id] ?? ""}
-                        onChange={e => setNotes(prev => ({ ...prev, [app.id]: e.target.value }))}
-                        rows={2}
-                        placeholder="Add private notes about this applicant..."
-                        className="resize-none text-sm"
-                      />
-                      <Button size="sm" variant="outline" className="mt-2" onClick={() => saveNotes(app.id)} disabled={updating === app.id}>
-                        Save Notes
-                      </Button>
+                    <div className="flex justify-between items-end gap-4">
+                      <div className="flex-1">
+                        <p className="text-xs font-medium text-muted-foreground mb-1.5">Internal Notes</p>
+                        <Textarea
+                          value={notes[app.id] ?? ""}
+                          onChange={e => setNotes(prev => ({ ...prev, [app.id]: e.target.value }))}
+                          rows={2}
+                          placeholder="Add private notes about this applicant..."
+                          className="resize-none text-sm"
+                        />
+                        <Button size="sm" variant="outline" className="mt-2" onClick={() => saveNotes(app.id)} disabled={updating === app.id}>
+                          Save Notes
+                        </Button>
+                      </div>
+                      
+                      {app.application_status === "rejected" && (
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => setDeleteId(app.id)}
+                          disabled={updating === app.id}
+                          className="shrink-0 gap-1.5"
+                        >
+                          <Trash2 size={14} />
+                          Delete
+                        </Button>
+                      )}
                     </div>
                   </div>
                 )}
@@ -203,6 +239,16 @@ export default function EmployerApplicantsPage() {
           })}
         </div>
       )}
+
+      <ConfirmDialog
+        open={!!deleteId}
+        onClose={() => setDeleteId(null)}
+        onConfirm={handleDelete}
+        title="Delete Applicant"
+        description="Are you sure you want to delete this applicant? This action is permanent and cannot be undone."
+        confirmLabel="Delete"
+        confirmVariant="destructive"
+      />
     </div>
   );
 }
