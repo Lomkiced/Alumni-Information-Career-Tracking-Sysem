@@ -1,5 +1,6 @@
 "use client";
 // components/shared/Sidebar.tsx
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -13,6 +14,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useUnreadMessages } from "@/providers/UnreadMessagesProvider";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { formatInitials } from "@/lib/utils/format";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "@/components/ui/dialog";
 
 const ALUMNI_MENU = [
   { href: "/alumni/profile", icon: User, label: "My Profile" },
@@ -61,6 +63,7 @@ export function Sidebar({ onClose }: SidebarProps) {
   const pathname = usePathname();
   const { profile, loading, signOut } = useAuth();
   const { unreadCount } = useUnreadMessages();
+  const [showSignOutConfirm, setShowSignOutConfirm] = useState(false);
   
   if (loading) {
     return (
@@ -147,7 +150,7 @@ export function Sidebar({ onClose }: SidebarProps) {
           </div>
         </div>
         <Button
-          onClick={signOut}
+          onClick={() => setShowSignOutConfirm(true)}
           variant="ghost"
           size="sm"
           className="w-full justify-start gap-2.5 text-sidebar-foreground/60 hover:text-red-400 hover:bg-red-500/10 px-3"
@@ -156,6 +159,21 @@ export function Sidebar({ onClose }: SidebarProps) {
           Sign Out
         </Button>
       </div>
+
+      <Dialog open={showSignOutConfirm} onOpenChange={setShowSignOutConfirm}>
+        <DialogContent className="max-w-sm rounded-xl">
+          <DialogHeader>
+            <DialogTitle>Sign Out</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to sign out of your account?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="mt-2">
+            <Button variant="outline" onClick={() => setShowSignOutConfirm(false)}>Cancel</Button>
+            <Button variant="destructive" onClick={signOut}>Sign Out</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
