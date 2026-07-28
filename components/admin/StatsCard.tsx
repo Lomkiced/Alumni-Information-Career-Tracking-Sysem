@@ -16,40 +16,52 @@ interface StatsCardProps {
 
 const COLOR_MAP = {
   blue: {
-    bg: "from-[#0d2b5a] to-[#1e4080]",
-    icon: "bg-white/15",
+    glow: "bg-blue-500/20",
+    border: "group-hover:border-blue-500/50",
+    iconBg: "bg-blue-500/10 text-blue-400 group-hover:bg-blue-500/20",
     text: "text-blue-100",
-    badge: "bg-white/20",
+    badgeBg: "bg-blue-500/10",
+    badgeText: "text-blue-400",
   },
   green: {
-    bg: "from-emerald-600 to-emerald-800",
-    icon: "bg-white/15",
+    glow: "bg-emerald-500/20",
+    border: "group-hover:border-emerald-500/50",
+    iconBg: "bg-emerald-500/10 text-emerald-400 group-hover:bg-emerald-500/20",
     text: "text-emerald-100",
-    badge: "bg-white/20",
+    badgeBg: "bg-emerald-500/10",
+    badgeText: "text-emerald-400",
   },
   amber: {
-    bg: "from-amber-500 to-amber-700",
-    icon: "bg-white/15",
+    glow: "bg-amber-500/20",
+    border: "group-hover:border-amber-500/50",
+    iconBg: "bg-amber-500/10 text-amber-400 group-hover:bg-amber-500/20",
     text: "text-amber-100",
-    badge: "bg-white/20",
+    badgeBg: "bg-amber-500/10",
+    badgeText: "text-amber-400",
   },
   purple: {
-    bg: "from-violet-600 to-purple-800",
-    icon: "bg-white/15",
-    text: "text-purple-100",
-    badge: "bg-white/20",
+    glow: "bg-violet-500/20",
+    border: "group-hover:border-violet-500/50",
+    iconBg: "bg-violet-500/10 text-violet-400 group-hover:bg-violet-500/20",
+    text: "text-violet-100",
+    badgeBg: "bg-violet-500/10",
+    badgeText: "text-violet-400",
   },
   red: {
-    bg: "from-rose-600 to-red-800",
-    icon: "bg-white/15",
-    text: "text-red-100",
-    badge: "bg-white/20",
+    glow: "bg-rose-500/20",
+    border: "group-hover:border-rose-500/50",
+    iconBg: "bg-rose-500/10 text-rose-400 group-hover:bg-rose-500/20",
+    text: "text-rose-100",
+    badgeBg: "bg-rose-500/10",
+    badgeText: "text-rose-400",
   },
   cyan: {
-    bg: "from-cyan-600 to-cyan-800",
-    icon: "bg-white/15",
+    glow: "bg-cyan-500/20",
+    border: "group-hover:border-cyan-500/50",
+    iconBg: "bg-cyan-500/10 text-cyan-400 group-hover:bg-cyan-500/20",
     text: "text-cyan-100",
-    badge: "bg-white/20",
+    badgeBg: "bg-cyan-500/10",
+    badgeText: "text-cyan-400",
   },
 };
 
@@ -58,36 +70,43 @@ export function StatsCard({ title, value, icon: Icon, color, description, trend,
 
   if (loading) {
     return (
-      <div className="rounded-2xl bg-muted/50 animate-pulse h-[120px]" />
+      <div className="rounded-2xl bg-white/5 border border-white/10 animate-pulse h-[140px]" />
     );
   }
 
   return (
     <div className={cn(
-      "relative rounded-2xl bg-gradient-to-br text-white shadow-lg overflow-hidden",
-      colors.bg
+      "group relative rounded-2xl glass border border-white/10 overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl",
+      colors.border
     )}>
-      {/* Background decoration */}
-      <div className="absolute -right-4 -top-4 w-24 h-24 bg-white/5 rounded-full" />
-      <div className="absolute -right-2 -bottom-4 w-16 h-16 bg-white/5 rounded-full" />
-
-      <div className="relative p-5">
-        <div className="flex items-start justify-between mb-3">
-          <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center", colors.icon)}>
-            <Icon size={20} />
+      {/* Dynamic Animated Glow */}
+      <div className={cn("absolute -top-12 -right-12 w-32 h-32 rounded-full blur-3xl opacity-50 group-hover:opacity-100 transition-opacity duration-500", colors.glow)} />
+      
+      <div className="relative p-5 z-10 flex flex-col h-full justify-between">
+        <div className="flex items-start justify-between mb-4">
+          <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center transition-colors duration-300 backdrop-blur-md", colors.iconBg)}>
+            <Icon size={24} />
           </div>
           {trend !== undefined && (
-            <div className={cn("flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-full", colors.badge)}>
-              {trend.value > 0 ? <TrendingUp size={11} /> : trend.value < 0 ? <TrendingDown size={11} /> : <Minus size={11} />}
+            <div className={cn("flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full", colors.badgeBg, colors.badgeText)}>
+              {trend.value > 0 ? <TrendingUp size={12} /> : trend.value < 0 ? <TrendingDown size={12} /> : <Minus size={12} />}
               {Math.abs(trend.value)}% {trend.label}
             </div>
           )}
         </div>
-        <p className="text-3xl font-bold tracking-tight">{value}</p>
-        <p className={cn("text-sm font-medium mt-1", colors.text)}>{title}</p>
-        {description && (
-          <p className="text-xs text-white/50 mt-0.5">{description}</p>
-        )}
+        
+        <div>
+          <p className="text-3xl font-heading font-bold tracking-tight text-foreground">{value}</p>
+          <div className="flex items-center gap-2 mt-1">
+            <p className="text-sm font-medium text-muted-foreground">{title}</p>
+            {description && (
+              <span className="hidden sm:inline-block w-1 h-1 rounded-full bg-border" />
+            )}
+            {description && (
+              <p className="hidden sm:block text-xs text-muted-foreground/70 truncate">{description}</p>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
