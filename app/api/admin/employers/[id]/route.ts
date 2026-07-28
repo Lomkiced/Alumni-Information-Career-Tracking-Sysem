@@ -1,8 +1,9 @@
-// app/api/admin/employers/[id]/route.ts
 import { NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/server";
 import { logAudit, AUDIT_ACTIONS } from "@/lib/utils/audit";
+import { sendEmail } from "@/lib/email/send";
+import { employerApprovedHtml, employerRejectedHtml } from "@/lib/email/templates/employer-approved";
 
 // GET /api/admin/employers/[id] — get single employer
 export async function GET(
@@ -76,6 +77,36 @@ export async function PATCH(
     if (updateErr) throw updateErr;
 
     const { data: empProfile } = await db.from("profiles").select("email, full_name").eq("id", id).single();
+    const { data: employerData } = await db.from("employers").select("company_name").eq("id", id).single();
+
+    if (action === "approve") {
+      const { error: authConfirmErr } = await adminClient.auth.admin.updateUserById(id, { email_confirm: true });
+      if (authConfirmErr) console.error("Failed to confirm auth email:", authConfirmErr);
+
+      if (empProfile?.email) {
+        await sendEmail({
+          to: empProfile.email,
+          subject: "Your Employer Account is Approved",
+          html: employerApprovedHtml({
+            full_name: empProfile.full_name,
+            company_name: employerData?.company_name || "your company",
+            login_url: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/login`,
+          }),
+        });
+      }
+    } else if (action === "reject") {
+      if (empProfile?.email) {
+        await sendEmail({
+          to: empProfile.email,
+          subject: "Update on Your Employer Account Registration",
+          html: employerRejectedHtml({
+            full_name: empProfile.full_name,
+            company_name: employerData?.company_name || "your company",
+            reason: rejection_reason || "Not specified",
+          }),
+        });
+      }
+    }
 
     await db.from("notifications").insert({
       user_id: id,
