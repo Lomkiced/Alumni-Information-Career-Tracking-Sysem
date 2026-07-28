@@ -4,6 +4,9 @@ import { createClient } from "@/lib/supabase/server";
 import { jobApplicationSchema } from "@/lib/validations/job.schema";
 import { logAudit, AUDIT_ACTIONS } from "@/lib/utils/audit";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 // GET /api/alumni/jobs — fetch active job postings
 export async function GET(request: NextRequest) {
   try {
@@ -25,6 +28,7 @@ export async function GET(request: NextRequest) {
       .select(`
         id, title, job_type, industry, location, is_remote,
         salary_min, salary_max, slots, expires_at, status, created_at,
+        description, requirements, preferred_courses,
         employers!inner(company_name, company_logo_url)
       `, { count: "exact" })
       .eq("status", "active")
@@ -39,7 +43,32 @@ export async function GET(request: NextRequest) {
       .range(from, from + pageSize - 1);
 
     if (error) throw error;
-    return Response.json({ data, count, page, pageSize });
+
+    // Fetch user's applied jobs
+    let appliedJobIds = new Set<string>();
+    if (data && data.length > 0) {
+      const jobIds = data.map((job: any) => job.id);
+      const { data: applications, error: appError } = await (supabase as any)
+        .from("job_applications")
+        .select("job_id")
+        .eq("alumni_id", user.id)
+        .in("job_id", jobIds);
+
+      console.log("[DEBUG /api/alumni/jobs] user.id:", user.id);
+      console.log("[DEBUG /api/alumni/jobs] jobIds:", jobIds);
+      console.log("[DEBUG /api/alumni/jobs] applications:", applications, appError);
+
+      if (applications) {
+        applications.forEach((app: any) => appliedJobIds.add(app.job_id));
+      }
+    }
+
+    const processedData = data?.map((job: any) => ({
+      ...job,
+      has_applied: appliedJobIds.has(job.id)
+    }));
+
+    return Response.json({ data: processedData, count, page, pageSize });
   } catch (error) {
     console.error("[GET /api/alumni/jobs]", error);
     return Response.json({ error: "Internal server error" }, { status: 500 });
@@ -65,12 +94,18 @@ export async function POST(request: NextRequest) {
 
     // Check not already applied
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: existing } = await (supabase as any)
+    const { data: existing, error: existingErr } = await (supabase as any)
       .from("job_applications")
       .select("id")
       .eq("job_id", job_id)
       .eq("alumni_id", user.id)
-      .single();
+      .maybeSingle();
+      
+    if (existingErr) {
+      console.error("[POST /api/alumni/jobs] Check Existing Error:", existingErr);
+      return Response.json({ error: "Failed to check existing applications." }, { status: 500 });
+    }
+      
     if (existing) return Response.json({ error: "You have already applied to this job." }, { status: 409 });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

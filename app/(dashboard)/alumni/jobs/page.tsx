@@ -1,7 +1,7 @@
 "use client";
 // app/(dashboard)/alumni/jobs/page.tsx
 import { useState, useEffect, useCallback } from "react";
-import { Briefcase, Search, MapPin, Clock, DollarSign, X, Loader2, Send, Paperclip } from "lucide-react";
+import { Briefcase, Search, MapPin, Clock, DollarSign, X, Loader2, Send, Paperclip, Eye } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { PageHeader } from "@/components/shared/PageHeader";
@@ -26,7 +26,11 @@ interface JobPosting {
   slots: number;
   expires_at: string;
   created_at: string;
+  description: string;
+  requirements?: string;
+  preferred_courses?: string[];
   employers: { company_name: string; company_logo_url?: string };
+  has_applied?: boolean;
 }
 
 const JOB_TYPES = ["full_time", "part_time", "contractual", "internship", "freelance"] as const;
@@ -43,6 +47,7 @@ export default function AlumniJobsPage() {
   const [industry, setIndustry] = useState("");
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
+  const [viewJob, setViewJob] = useState<JobPosting | null>(null);
   const [applyJob, setApplyJob] = useState<JobPosting | null>(null);
   const [coverLetter, setCoverLetter] = useState("");
   const [coverLetterMode, setCoverLetterMode] = useState<"text" | "upload">("text");
@@ -166,8 +171,20 @@ export default function AlumniJobsPage() {
     });
     const json = await res.json();
     setApplying(false);
+    
+    if (res.status === 409) {
+      toast.info("You have already applied to this job.");
+      setJobs(prevJobs => prevJobs.map(j => j.id === applyJob.id ? { ...j, has_applied: true } : j));
+      setApplyJob(null);
+      return;
+    }
+
     if (!res.ok) { toast.error(json.error ?? "Application failed"); return; }
     toast.success("Application submitted successfully!");
+    
+    // Update the jobs list to show this job as applied
+    setJobs(prevJobs => prevJobs.map(j => j.id === applyJob.id ? { ...j, has_applied: true } : j));
+    
     setApplyJob(null);
     setCoverLetter("");
     setCoverLetterFile(null);
@@ -248,13 +265,25 @@ export default function AlumniJobsPage() {
                   </div>
                 </div>
 
-                <Button
-                  size="sm"
-                  className="mt-auto bg-primary hover:bg-primary/90 w-full"
-                  onClick={() => setApplyJob(job)}
-                >
-                  Apply Now
-                </Button>
+                <div className="flex gap-2 mt-auto">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1"
+                    onClick={() => setViewJob(job)}
+                  >
+                    <Eye size={16} className="mr-1.5" />
+                    Details
+                  </Button>
+                  <Button
+                    size="sm"
+                    className="bg-primary hover:bg-primary/90 flex-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                    onClick={() => setApplyJob(job)}
+                    disabled={job.has_applied}
+                  >
+                    {job.has_applied ? "Applied" : "Apply Now"}
+                  </Button>
+                </div>
               </div>
             ))}
           </div>
@@ -269,6 +298,91 @@ export default function AlumniJobsPage() {
             </div>
           )}
         </>
+      )}
+
+      {/* View Job Modal */}
+      {viewJob && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setViewJob(null)} />
+          <div className="relative z-10 w-full max-w-2xl max-h-[90vh] rounded-2xl border border-border/50 bg-card p-0 shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            {/* Modal Header */}
+            <div className="px-6 py-5 border-b border-border/50 bg-muted/20 flex items-start justify-between shrink-0">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                  <Briefcase size={20} />
+                </div>
+                <div>
+                  <h3 className="font-heading font-semibold text-lg text-foreground leading-tight">{viewJob.title}</h3>
+                  <p className="text-sm text-muted-foreground mt-0.5">{viewJob.employers?.company_name}</p>
+                </div>
+              </div>
+              <button onClick={() => setViewJob(null)} className="text-muted-foreground hover:text-foreground p-1.5 rounded-full hover:bg-muted transition-colors">
+                <X size={18} />
+              </button>
+            </div>
+            
+            {/* Modal Body */}
+            <div className="p-6 overflow-y-auto">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6 text-sm">
+                <div>
+                  <p className="text-muted-foreground mb-1 text-xs uppercase font-semibold">Job Type</p>
+                  <p className="font-medium">{JOB_TYPE_LABELS[viewJob.job_type]}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground mb-1 text-xs uppercase font-semibold">Location</p>
+                  <p className="font-medium">{viewJob.is_remote ? "Remote" : viewJob.location || "N/A"}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground mb-1 text-xs uppercase font-semibold">Salary</p>
+                  <p className="font-medium">{formatSalary(viewJob.salary_min, viewJob.salary_max) || "Negotiable"}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground mb-1 text-xs uppercase font-semibold">Slots</p>
+                  <p className="font-medium">{viewJob.slots}</p>
+                </div>
+              </div>
+
+              <div className="prose prose-sm dark:prose-invert max-w-none space-y-6">
+                <div>
+                  <h4 className="text-base font-semibold text-foreground mb-2 flex items-center gap-2">
+                    <Briefcase size={16} className="text-primary" /> Job Description
+                  </h4>
+                  <div className="text-muted-foreground whitespace-pre-wrap" dangerouslySetInnerHTML={{ __html: viewJob.description }} />
+                </div>
+
+                {viewJob.requirements && (
+                  <div>
+                    <h4 className="text-base font-semibold text-foreground mb-2 flex items-center gap-2">
+                      <Search size={16} className="text-primary" /> Requirements
+                    </h4>
+                    <div className="text-muted-foreground whitespace-pre-wrap" dangerouslySetInnerHTML={{ __html: viewJob.requirements }} />
+                  </div>
+                )}
+
+                {viewJob.preferred_courses && viewJob.preferred_courses.length > 0 && (
+                  <div>
+                    <h4 className="text-base font-semibold text-foreground mb-2">Preferred Courses</h4>
+                    <ul className="list-disc pl-5 text-muted-foreground">
+                      {viewJob.preferred_courses.map(c => <li key={c}>{c}</li>)}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            {/* Modal Footer */}
+            <div className="px-6 py-4 bg-muted/20 border-t border-border/50 flex gap-3 justify-end shrink-0">
+              <Button variant="outline" onClick={() => setViewJob(null)} className="border-border/50">Close</Button>
+              <Button 
+                className="bg-primary hover:bg-primary/90 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed" 
+                onClick={() => { setApplyJob(viewJob); setViewJob(null); }} 
+                disabled={viewJob.has_applied}
+              >
+                {viewJob.has_applied ? "Already Applied" : "Apply Now"}
+              </Button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Apply Modal */}
