@@ -17,18 +17,14 @@ import { formatInitials } from "@/lib/utils/format";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "@/components/ui/dialog";
 
 const ALUMNI_MENU = [
-  { href: "/alumni/profile", icon: User, label: "My Profile" },
   { href: "/alumni/career", icon: Briefcase, label: "Career History" },
   { href: "/alumni/jobs", icon: FileText, label: "Job Board" },
-  { href: "/messages", icon: MessageCircle, label: "Messages" },
   { href: "/alumni/announcements", icon: Megaphone, label: "Announcements" },
 ];
 
 const EMPLOYER_MENU = [
   { href: "/employer/jobs", icon: Briefcase, label: "My Job Postings" },
   { href: "/employer/applicants", icon: UserCheck, label: "Applicants" },
-  { href: "/messages", icon: MessageCircle, label: "Messages" },
-  { href: "/employer/profile", icon: Building2, label: "Company Profile" },
   { href: "/employer/announcements", icon: Megaphone, label: "Announcements" },
 ];
 
@@ -37,7 +33,6 @@ const ADMIN_MENU = [
   { href: "/admin/alumni", icon: Users, label: "Alumni" },
   { href: "/admin/employers", icon: Building2, label: "Employers" },
   { href: "/admin/jobs", icon: Briefcase, label: "Job Moderation" },
-  { href: "/messages", icon: MessageCircle, label: "Messages" },
   { href: "/admin/reports", icon: BarChart3, label: "Reports & Analytics" },
   { href: "/admin/announcements", icon: Megaphone, label: "Announcements" },
   { href: "/admin/audit-logs", icon: ScrollText, label: "Audit Logs" },
@@ -122,14 +117,7 @@ export function Sidebar({ onClose }: SidebarProps) {
               <Icon size={20} className={cn("shrink-0", isActive ? "text-sidebar-primary-foreground" : "text-sidebar-foreground/50 group-hover:text-sidebar-accent-foreground")} />
               <span className="flex-1">{label}</span>
               
-              {/* Unread Messages Badge */}
-              {isMessages && unreadCount > 0 && (
-                <span className="bg-destructive text-destructive-foreground text-[10px] font-bold px-2 py-0.5 rounded-full animate-in zoom-in spin-in-2 duration-300">
-                  {unreadCount > 99 ? '99+' : unreadCount}
-                </span>
-              )}
-              
-              {isActive && !isMessages && <ChevronRight size={16} className="opacity-60" />}
+              {isActive && <ChevronRight size={16} className="opacity-60" />}
             </Link>
           );
         })}
@@ -137,7 +125,7 @@ export function Sidebar({ onClose }: SidebarProps) {
 
       {/* User section */}
       <div className="px-3 py-4 border-t border-sidebar-border space-y-2">
-        <div className="flex items-center gap-3 px-2 py-2 rounded-lg">
+        <Link href={`/${role}/profile`} className="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-sidebar-accent transition-colors">
           <Avatar className="h-10 w-10 ring-2 ring-sidebar-primary/40">
             <AvatarImage src={profile?.profile_photo_url || undefined} alt={profile?.full_name || undefined} />
             <AvatarFallback className="bg-sidebar-primary text-sidebar-primary-foreground text-sm font-semibold">
@@ -145,10 +133,10 @@ export function Sidebar({ onClose }: SidebarProps) {
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
-            <p className="text-sidebar-foreground text-base font-medium truncate">{profile?.full_name ?? "Loading..."}</p>
+            <p className="text-sidebar-foreground text-base font-medium truncate group-hover:text-sidebar-accent-foreground">{profile?.full_name ?? "Loading..."}</p>
             <p className="text-sidebar-foreground/50 text-sm truncate">{profile?.email ?? ""}</p>
           </div>
-        </div>
+        </Link>
         <Button
           onClick={() => setShowSignOutConfirm(true)}
           variant="ghost"

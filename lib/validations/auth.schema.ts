@@ -84,8 +84,21 @@ export const resetPasswordSchema = z
     path: ["confirm_password"],
   });
 
+export const adminRegisterSchema = z
+  .object({
+    full_name: z.string().min(2, "Full name must be at least 2 characters").max(100),
+    email: z.string().email("Invalid email address"),
+    password: passwordSchema,
+    confirm_password: z.string().min(1, "Please confirm your password"),
+  })
+  .refine((d) => d.password === d.confirm_password, {
+    message: "Passwords do not match",
+    path: ["confirm_password"],
+  });
+
 export type LoginInput = z.infer<typeof loginSchema>;
 export type AlumniRegisterInput = z.infer<typeof alumniRegisterSchema>;
 export type EmployerRegisterInput = z.infer<typeof employerRegisterSchema>;
+export type AdminRegisterInput = z.infer<typeof adminRegisterSchema>;
 export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
 export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;

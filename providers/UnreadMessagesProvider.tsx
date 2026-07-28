@@ -6,9 +6,13 @@ import { useAuth } from "@/hooks/useAuth";
 
 interface UnreadMessagesContextType {
   unreadCount: number;
+  decrementUnreadCount: (amount: number) => void;
 }
 
-const UnreadMessagesContext = createContext<UnreadMessagesContextType>({ unreadCount: 0 });
+const UnreadMessagesContext = createContext<UnreadMessagesContextType>({ 
+  unreadCount: 0,
+  decrementUnreadCount: () => {}
+});
 
 export const useUnreadMessages = () => useContext(UnreadMessagesContext);
 
@@ -16,6 +20,10 @@ export function UnreadMessagesProvider({ children }: { children: ReactNode }) {
   const [unreadCount, setUnreadCount] = useState(0);
   const { profile, loading } = useAuth();
   const supabase = createClient();
+
+  const decrementUnreadCount = (amount: number) => {
+    setUnreadCount((prev) => Math.max(0, prev - amount));
+  };
 
   useEffect(() => {
     if (loading || !profile?.id) return;
@@ -52,14 +60,10 @@ export function UnreadMessagesProvider({ children }: { children: ReactNode }) {
       .on(
         "postgres_changes",
         { event: "UPDATE", schema: "public", table: "messages" },
-        (payload) => {
-          const oldMsg = payload.old as { is_read: boolean };
-          const newMsg = payload.new as { sender_id: string; is_read: boolean };
-          
-          // If a message we received was just marked as read, decrement count
-          if (newMsg.sender_id !== profile.id && oldMsg.is_read === false && newMsg.is_read === true) {
-            setUnreadCount((prev) => Math.max(0, prev - 1));
-          }
+        () => {
+          // When a message is updated (e.g. marked as read), just recalculate the total
+          // to guarantee perfect synchronization.
+          fetchUnreadCount();
         }
       )
       .subscribe();
@@ -70,7 +74,7 @@ export function UnreadMessagesProvider({ children }: { children: ReactNode }) {
   }, [profile?.id, loading, supabase]);
 
   return (
-    <UnreadMessagesContext.Provider value={{ unreadCount }}>
+    <UnreadMessagesContext.Provider value={{ unreadCount, decrementUnreadCount }}>
       {children}
     </UnreadMessagesContext.Provider>
   );

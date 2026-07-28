@@ -9,10 +9,12 @@ import { formatInitials } from "@/lib/utils/format";
 
 import { Suspense } from "react";
 import { toast } from "sonner";
+import { useUnreadMessages } from "@/providers/UnreadMessagesProvider";
 
 function MessagesContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { decrementUnreadCount } = useUnreadMessages();
   const [conversations, setConversations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -37,7 +39,19 @@ function MessagesContent() {
     return () => clearInterval(interval);
   }, []);
 
-  const openChat = (userId: string) => {
+  const openChat = (userId: string, currentUnread: number) => {
+    // Optimistic UI updates for immediate user feedback
+    if (currentUnread > 0) {
+      decrementUnreadCount(currentUnread);
+      setConversations(prev => 
+        prev.map(c => 
+          c.otherUser.id === userId 
+            ? { ...c, unreadCount: 0 } 
+            : c
+        )
+      );
+    }
+    
     const newParams = new URLSearchParams(searchParams.toString());
     newParams.set("chat", userId);
     router.replace(`?${newParams.toString()}`, { scroll: false });
@@ -93,7 +107,7 @@ function MessagesContent() {
             return (
               <div 
                 key={conv.id}
-                onClick={() => openChat(user.id)}
+                onClick={() => openChat(user.id, conv.unreadCount)}
                 className="group flex items-center gap-4 p-4 hover:bg-muted/50 cursor-pointer transition-colors relative"
               >
                 <Avatar className="w-12 h-12 shrink-0 border border-border">
