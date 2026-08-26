@@ -64,7 +64,7 @@ export async function PATCH(
   }
 }
 
-// DELETE /api/alumni/career/[id]
+// DELETE /api/alumni/career/[id] — Soft delete (archive)
 export async function DELETE(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -81,10 +81,14 @@ export async function DELETE(
     if (!existing) return Response.json({ error: "Not found" }, { status: 404 });
     if (existing.alumni_id !== user.id) return Response.json({ error: "Forbidden" }, { status: 403 });
 
-    const { error } = await db.from("career_records").delete().eq("id", id);
+    // Soft delete: set is_archived = true, and if it was current, unset it
+    const { error } = await db
+      .from("career_records")
+      .update({ is_archived: true, is_current: false })
+      .eq("id", id);
     if (error) throw error;
 
-    await logAudit({ userId: user.id, action: AUDIT_ACTIONS.DELETE_CAREER_RECORD, tableName: "career_records", recordId: id });
+    await logAudit({ userId: user.id, action: "ARCHIVE_CAREER_RECORD", tableName: "career_records", recordId: id });
     return Response.json({ data: { success: true } });
   } catch (error) {
     console.error("[DELETE /api/alumni/career/[id]]", error);

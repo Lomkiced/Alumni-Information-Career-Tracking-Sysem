@@ -5,17 +5,21 @@ import { careerRecordSchema } from "@/lib/validations/career.schema";
 import { logAudit, AUDIT_ACTIONS } from "@/lib/utils/audit";
 
 // GET /api/alumni/career — fetch own career records
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient();
     const { data: { user }, error: authErr } = await supabase.auth.getUser();
     if (authErr || !user) return Response.json({ error: "Unauthorized" }, { status: 401 });
 
+    const searchParams = request.nextUrl.searchParams;
+    const archived = searchParams.get("archived") === "true";
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data, error } = await (supabase as any)
       .from("career_records")
-      .select("id, employment_status, employer_name, job_title, industry, employment_type, salary_range, start_date, end_date, is_current, country, city, job_description, created_at")
+      .select("id, employment_status, employer_name, job_title, industry, employment_type, salary_range, start_date, end_date, is_current, country, city, job_description, created_at, is_archived")
       .eq("alumni_id", user.id)
+      .eq("is_archived", archived)
       .order("start_date", { ascending: false });
 
     if (error) throw error;
